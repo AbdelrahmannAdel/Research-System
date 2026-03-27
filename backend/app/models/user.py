@@ -1,3 +1,5 @@
+# Defines the users table, stores all registered user accounts
+
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
 from app.database import Base
