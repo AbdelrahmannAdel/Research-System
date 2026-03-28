@@ -6,7 +6,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.api import auth
+from app.api import auth, papers
 from app.models import paper
 
 # Create all database tables on startup if they don't already exist.
@@ -30,6 +30,9 @@ app.add_middleware(
 
 # Register the auth router, makes /auth/register and /auth/login available
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+
+# Register the paper router, makes all /papers endpoints available
+app.include_router(papers.router, prefix="/papers", tags=["Papers"])
 
 # Root endpoint, used to verify the backend is running
 @app.get("/")
