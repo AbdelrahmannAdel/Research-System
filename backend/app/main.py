@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.api import auth
+from app.models import paper
 
 # Create all database tables on startup if they don't already exist.
 # SQLAlchemy looks at all models that inherit from Base (User, SavedPaper)
