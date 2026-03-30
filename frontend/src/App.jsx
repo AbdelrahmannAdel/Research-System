@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
+import HomePage from './pages/HomePage.jsx'
+import ProfilePage from './pages/ProfilePage.jsx'
 
 // Redirects to /login if the user is not authenticated
 function ProtectedRoute({ token, children }) {
@@ -10,34 +12,43 @@ function ProtectedRoute({ token, children }) {
 }
 
 function App() {
-  const [token, setToken] = useState(null)
+  // Holding shared data in App.jsx is better than seperate pages.
+  const [token, setToken] = useState(null) // default null => Logged out
+  const [userName, setUserName] = useState('')
   const [darkMode, setDarkMode] = useState(true)
 
-  const handleLogin = (accessToken) => {
+  const handleLogin = (accessToken, name) => {
     setToken(accessToken)
+    setUserName(name)
   }
 
+  const handleLogout = () => {
+    setToken(null)
+    setUserName('')
+  }
+
+  // Shared props passed to every protected page
+  const pageProps = { userName, darkMode, setDarkMode, onLogout: handleLogout, token }
+
+  // Single Page Application - no route upon URL change => React swaps component instantly
   return (
-    // Applying 'dark' class here activates all dark: variants across the app
     <div className={darkMode ? 'dark' : ''}>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage onLogin={handleLogin} darkMode={darkMode} setDarkMode={setDarkMode} />} />
           <Route path="/register" element={<RegisterPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
 
-          {/* Protected routes — redirect to /login if no token */}
           <Route path="/home" element={
             <ProtectedRoute token={token}>
-              <div className="text-white p-8">Home page — coming soon</div>
+              <HomePage {...pageProps} />
             </ProtectedRoute>
           } />
           <Route path="/profile" element={
             <ProtectedRoute token={token}>
-              <div className="text-white p-8">Profile page — coming soon</div>
+              <ProfilePage {...pageProps} />
             </ProtectedRoute>
           } />
 
-          {/* Default: redirect root to /login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

@@ -9,18 +9,19 @@ function LoginPage({ onLogin, darkMode, setDarkMode }) {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => { 
     e.preventDefault()
     setError('')
     setLoading(true)
 
     try {
       const response = await axios.post('http://localhost:8000/auth/login', { email, password })
-      onLogin(response.data.access_token)
+      onLogin(response.data.access_token, response.data.name)
       navigate('/home')
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed. Please try again.')
     } finally {
+      // Always turn off loading state
       setLoading(false)
     }
   }
