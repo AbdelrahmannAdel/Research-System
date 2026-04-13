@@ -1,6 +1,6 @@
 # AI-Based Research Paper Intelligence System
 
-A senior capstone project that automatically classifies, summarizes, extracts keywords from, and recommends similar papers for any uploaded research paper PDF.
+A senior capstone project that automatically classifies, summarizes, extracts keywords from, and recommends similar papers for any uploaded research paper PDF
 
 ---
 
