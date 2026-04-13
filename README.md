@@ -8,11 +8,10 @@ A senior capstone project that automatically classifies, summarizes, extracts ke
 
 Install these before setting up the project:
 
-- [Python 3.10](https://www.python.org/downloads/release/python-3100/) — check "Add Python to PATH" during install
+- [Python 3.10](https://www.python.org/downloads/release/python-3100/)
 - [Node.js LTS](https://nodejs.org/) — all defaults
 - [Git](https://git-scm.com/download/win) — all defaults
-- [PostgreSQL 16](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) — set password to `pass`, port `5432`, install pgAdmin 4
-
+- [PostgreSQL 16](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
 ---
 
 ## Setup
