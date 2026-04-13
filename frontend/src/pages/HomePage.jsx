@@ -1,25 +1,8 @@
 import { useState, useRef } from 'react'
+import axios from 'axios'
 import Navbar from '../components/Navbar.jsx'
 
-// Mock response — will be replaced with real API call in Phase 3
-const MOCK_RESULT = {
-  title: 'Attention Is All You Need',
-  main_category: 'Computer Science',
-  subcategory: 'Machine Learning',
-  summary: 'This paper proposes the Transformer, a novel neural network architecture based entirely on attention mechanisms, dispensing with recurrence and convolutions. The model achieves state-of-the-art results on machine translation tasks while being significantly more parallelizable and requiring substantially less training time.',
-  keywords: ['transformer', 'attention mechanism', 'neural network', 'machine translation', 'self-attention', 'encoder-decoder', 'NLP', 'deep learning', 'parallelization', 'BLEU score'],
-}
-
-// Mock recommendations — will be replaced with real API call in Phase 3
-const MOCK_RECOMMENDATIONS = [
-  { title: 'BERT: Pre-training of Deep Bidirectional Transformers', authors: 'Devlin et al.', abstract: 'We introduce BERT, a new language representation model designed to pre-train deep bidirectional representations from unlabeled text...', similarity: 94, url: 'https://arxiv.org/abs/1810.04805' },
-  { title: 'An Image is Worth 16x16 Words: Transformers for Image Recognition', authors: 'Dosovitskiy et al.', abstract: 'While the Transformer architecture has become the de-facto standard for NLP tasks, its applications to computer vision remain limited...', similarity: 88, url: 'https://arxiv.org/abs/2010.11929' },
-  { title: 'GPT-3: Language Models are Few-Shot Learners', authors: 'Brown et al.', abstract: 'We demonstrate that scaling language models greatly improves task-agnostic, few-shot performance...', similarity: 85, url: 'https://arxiv.org/abs/2005.14165' },
-  { title: 'Scaling Laws for Neural Language Models', authors: 'Kaplan et al.', abstract: 'We study empirical scaling laws for language model performance on the cross-entropy loss...', similarity: 79, url: 'https://arxiv.org/abs/2001.08361' },
-  { title: 'Deep Residual Learning for Image Recognition', authors: 'He et al.', abstract: 'We present a residual learning framework to ease the training of networks that are substantially deeper...', similarity: 72, url: 'https://arxiv.org/abs/1512.03385' },
-]
-
-function HomePage({ userName, darkMode, setDarkMode, onLogout }) {
+function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   // This page has 7 pieces of state
   const [selectedFile, setSelectedFile] = useState(null) // which file is chosen
   const [loading, setLoading] = useState(false) // analysis running?
@@ -44,34 +27,65 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout }) {
     }
   }
 
-  const handleAnalyze = async () => {
+const handleAnalyze = async () => {
     if (!selectedFile) return
     setLoading(true)
     setResult(null)
     setRecommendations(null)
     setSaved(false)
 
-    // Simulate network delay — replace with real axios call in Phase 3
-    await new Promise(r => setTimeout(r, 1500))
-    setResult(MOCK_RESULT)
-    setLoading(false)
-  }
+    try {
+      const formData = new FormData()
+      formData.append('file', selectedFile)
+      const response = await axios.post('http://localhost:8000/papers/upload', formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setResult(response.data)
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Upload failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+}
 
-  const handleGetRecommendations = async () => {
+const handleGetRecommendations = async () => {
     setLoadingRecs(true)
 
-    // Simulate network delay — replace with real axios call in Phase 3
-    await new Promise(r => setTimeout(r, 1200))
-    setRecommendations(MOCK_RECOMMENDATIONS)
-    setLoadingRecs(false)
+    try {
+      const response = await axios.post('http://localhost:8000/papers/recommend', {
+        title: result.title,
+        keywords: result.keywords
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setRecommendations(response.data)
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Failed to fetch recommendations.')
+    } finally {
+      setLoadingRecs(false)
+    }
   }
 
-  const handleSave = async () => {
-    // Replace with real axios call in Phase 3
+const handleSave = async () => {
     setSavingMsg('Saving...')
-    await new Promise(r => setTimeout(r, 800))
-    setSaved(true)
-    setSavingMsg('Saved to library!')
+
+    try {
+      await axios.post('http://localhost:8000/papers/save', {
+        title: result.title,
+        main_category: result.main_category,
+        subcategory: result.subcategory,
+        summary: result.summary,
+        keywords: result.keywords,
+        recommendations: recommendations || []
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setSaved(true)
+      setSavingMsg('Saved to library!')
+    } catch (err) {
+      setSavingMsg('')
+      alert(err.response?.data?.detail || 'Failed to save paper.')
+    }
   }
 
   return (

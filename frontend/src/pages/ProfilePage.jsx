@@ -1,35 +1,27 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import Navbar from '../components/Navbar.jsx'
 
-// Mock saved papers — will be replaced with real API call in Phase 3
-const MOCK_SAVED_PAPERS = [
-  {
-    id: 1,
-    title: 'Attention Is All You Need',
-    main_category: 'Computer Science',
-    subcategory: 'Machine Learning',
-    saved_at: '2026-03-28',
-    summary: 'This paper proposes the Transformer, a novel neural network architecture based entirely on attention mechanisms, dispensing with recurrence and convolutions.',
-    keywords: ['transformer', 'attention mechanism', 'neural network', 'machine translation', 'self-attention'],
-    recommendations: [
-      { title: 'BERT: Pre-training of Deep Bidirectional Transformers', authors: 'Devlin et al.', similarity: 94, url: 'https://arxiv.org/abs/1810.04805' },
-      { title: 'An Image is Worth 16x16 Words', authors: 'Dosovitskiy et al.', similarity: 88, url: 'https://arxiv.org/abs/2010.11929' },
-    ],
-  },
-  {
-    id: 2,
-    title: 'Deep Residual Learning for Image Recognition',
-    main_category: 'Computer Science',
-    subcategory: 'Computer Vision',
-    saved_at: '2026-03-25',
-    summary: 'We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously.',
-    keywords: ['residual network', 'deep learning', 'image recognition', 'skip connections', 'CNN'],
-    recommendations: [],
-  },
-]
-
-function ProfilePage({ userName, darkMode, setDarkMode, onLogout }) {
+function ProfilePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   const [expandedId, setExpandedId] = useState(null)
+  const [savedPapers, setSavedPapers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchPapers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/papers/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setSavedPapers(response.data)
+      } catch (err) {
+        alert(err.response?.data?.detail || 'Failed to load saved papers.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchPapers()
+  }, [token])
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id)
@@ -42,7 +34,9 @@ function ProfilePage({ userName, darkMode, setDarkMode, onLogout }) {
       <main className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="text-2xl font-bold text-uob-dark dark:text-white mb-8">My Library</h1>
 
-        {MOCK_SAVED_PAPERS.length === 0 ? (
+        {loading ? ( 
+          <div className="text-center py-20 text-gray-400">Loading...</div> 
+        ) : savedPapers.length === 0 ? (
           // Empty state
           <div className="text-center py-20 text-gray-400 dark:text-gray-500">
             <p className="text-4xl mb-4">📂</p>
@@ -51,7 +45,7 @@ function ProfilePage({ userName, darkMode, setDarkMode, onLogout }) {
           </div>
         ) : (
           <div className="space-y-4">
-            {MOCK_SAVED_PAPERS.map((paper) => (
+            {savedPapers.map((paper) => (
               <div key={paper.id} className="bg-white dark:bg-white/5 rounded-xl shadow overflow-hidden">
 
                 {/* Card header — always visible, click to expand */}
