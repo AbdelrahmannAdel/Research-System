@@ -1,6 +1,6 @@
 # Handles all paper-related endpoints: upload, recommend, save, and profile
 # All routes here are prefixed with /papers (set in main.py)
-# Upload and recommend return hardcoded mock data (real AI logic added in Phase 3)
+# Upload and recommend use real AI services.
 # Save and profile interact with the real database
 
 import json
@@ -12,6 +12,12 @@ from app.database import get_db
 from app.models.user import User
 from app.models.paper import SavedPaper
 from app.core.dependencies import get_current_user
+from app.services.pdf_extractor import extract_from_pdf
+from app.services.preprocessor import clean_text
+from app.services.classifier import classify
+from app.services.summarizer import summarize
+from app.services.keyword_extractor import extract_keywords
+from app.services.recommender import get_recommendations
 
 router = APIRouter()
 
@@ -32,96 +38,37 @@ class SaveRequest(BaseModel):
 
 
 @router.post("/upload")
-def upload_paper(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
-    # File is received but ignored — mock response returned instead
-    # In Phase 3 this will run the full AI pipeline: extract, classify, summarize, keywords
+async def upload_paper(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+    # Read raw bytes from the uploaded PDF
+    file_bytes = await file.read()
+
+    # Extract title, full text, and summary input from the PDF
+    extracted = extract_from_pdf(file_bytes)
+
+    # Clean the full text for classifier and keyword extractor
+    cleaned_text = clean_text(extracted["full_text"])
+
+    # Run classification, summarization, and keyword extraction in parallel
+    classification = classify(cleaned_text)
+    summary = summarize(extracted["summary_input"])
+    keywords = extract_keywords(cleaned_text)
+
     return {
-        "title": "Attention Is All You Need",
-        "main_category": "Computer Science",
-        "subcategory": "Machine Learning",
-        "summary": "This paper proposes the Transformer, a novel neural network architecture based entirely on attention mechanisms, dispensing with recurrence and convolutions. The model achieves state-of-the-art results on machine translation tasks while being significantly more parallelizable and requiring substantially less training time.",
-        "keywords": ["transformer", "attention mechanism", "neural network", "machine translation", "self-attention"],
-        "confidence_score": 0.94,
-        "low_confidence": False
+        "title": extracted["title"],
+        "main_category": classification["main_category"],
+        "subcategory": classification["subcategory"],
+        "summary": summary,
+        "keywords": keywords,
+        "confidence_score": classification["confidence_score"],
+        "low_confidence": classification["low_confidence"]
     }
 
 
 @router.post("/recommend")
 def recommend_papers(request: RecommendRequest, current_user: User = Depends(get_current_user)):
-    # Title and keywords are received but ignored — mock recommendations returned instead
-    # In Phase 3 this will call the arXiv API and re-rank results using cosine similarity
-    return [
-        {
-            "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
-            "authors": "Devlin et al.",
-            "abstract": "We introduce BERT, a new language representation model designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers.",
-            "similarity": 94,
-            "url": "https://arxiv.org/abs/1810.04805"
-        },
-        {
-            "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
-            "authors": "Dosovitskiy et al.",
-            "abstract": "While the Transformer architecture has become the de-facto standard for NLP tasks, its applications to computer vision remain limited. We show that a pure transformer applied directly to sequences of image patches can perform very well on image classification tasks.",
-            "similarity": 88,
-            "url": "https://arxiv.org/abs/2010.11929"
-        },
-        {
-            "title": "GPT-3: Language Models are Few-Shot Learners",
-            "authors": "Brown et al.",
-            "abstract": "We demonstrate that scaling language models greatly improves task-agnostic, few-shot performance, sometimes even becoming competitive with prior state-of-the-art fine-tuning approaches.",
-            "similarity": 85,
-            "url": "https://arxiv.org/abs/2005.14165"
-        },
-        {
-            "title": "Scaling Laws for Neural Language Models",
-            "authors": "Kaplan et al.",
-            "abstract": "We study empirical scaling laws for language model performance on the cross-entropy loss. The loss scales as a power-law with model size, dataset size, and the amount of compute used for training.",
-            "similarity": 79,
-            "url": "https://arxiv.org/abs/2001.08361"
-        },
-        {
-            "title": "Deep Residual Learning for Image Recognition",
-            "authors": "He et al.",
-            "abstract": "We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs.",
-            "similarity": 72,
-            "url": "https://arxiv.org/abs/1512.03385"
-        },
-        {
-            "title": "Generative Adversarial Networks",
-            "authors": "Goodfellow et al.",
-            "abstract": "We propose a new framework for estimating generative models via an adversarial process, in which we simultaneously train two models: a generative model G that captures the data distribution, and a discriminative model D.",
-            "similarity": 68,
-            "url": "https://arxiv.org/abs/1406.2661"
-        },
-        {
-            "title": "Dropout: A Simple Way to Prevent Neural Networks from Overfitting",
-            "authors": "Srivastava et al.",
-            "abstract": "We describe dropout, a technique for addressing overfitting in neural networks. The key idea is to randomly drop units from the neural network during training.",
-            "similarity": 64,
-            "url": "https://jmlr.org/papers/v15/srivastava14a.html"
-        },
-        {
-            "title": "Adam: A Method for Stochastic Optimization",
-            "authors": "Kingma and Ba",
-            "abstract": "We introduce Adam, an algorithm for first-order gradient-based optimization of stochastic objective functions, based on adaptive estimates of lower-order moments.",
-            "similarity": 61,
-            "url": "https://arxiv.org/abs/1412.6980"
-        },
-        {
-            "title": "XLNet: Generalized Autoregressive Pretraining for Language Understanding",
-            "authors": "Yang et al.",
-            "abstract": "With the capability of modeling bidirectional contexts, denoising autoencoding based pretraining like BERT achieves better performance than pretraining approaches based on autoregressive language modeling.",
-            "similarity": 57,
-            "url": "https://arxiv.org/abs/1906.08237"
-        },
-        {
-            "title": "RoBERTa: A Robustly Optimized BERT Pretraining Approach",
-            "authors": "Liu et al.",
-            "abstract": "We present a replication study of BERT pretraining that carefully measures the impact of many key hyperparameters and training data size. We find that BERT was significantly undertrained.",
-            "similarity": 53,
-            "url": "https://arxiv.org/abs/1907.11692"
-        }
-    ]
+    # Call the recommender service with title and keywords
+    results = get_recommendations(request.title, request.keywords)
+    return results
 
 
 @router.post("/save")
