@@ -7,7 +7,8 @@ from pydantic_settings import BaseSettings
 # Each attribute defined here must exist in the .env file
 class Settings(BaseSettings):
     DATABASE_URL: str  # PostgreSQL connection string
-    SECRET_KEY: str    # secret used to sign and verify JWT tokens
+    SECRET_KEY: str    # secret key used to sign and verify JWT tokens
+    GEMINI_API_KEY: str
 
     class Config:
         # Tell BaseSettings to look for variables in the .env file
