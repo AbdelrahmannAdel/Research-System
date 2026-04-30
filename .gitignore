@@ -1,7 +1,9 @@
 venv/
+.venv/
 __pycache__/
 *.pyc
 .env
 node_modules/
 *.db
 .idea/
+*.csv
