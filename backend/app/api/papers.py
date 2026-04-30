@@ -59,7 +59,8 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
         "subcategory": classification["subcategory"],
         "summary": summary,
         "keywords": keywords,
-        "confidence_score": classification["confidence_score"],
+        "l1_confidence": classification["l1_confidence"],
+        "l2_confidence": classification["l2_confidence"],
         "low_confidence": classification["low_confidence"]
     }
 

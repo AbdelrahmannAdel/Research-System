@@ -11,7 +11,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   const [loadingRecs, setLoadingRecs] = useState(false) // recs loading?
   const [saved, setSaved] = useState(false) // paper saved?
   const [savingMsg, setSavingMsg] = useState('') // Saved to Library msg
-  
+
   // hidden file input for UI/UX purposes - hide file input with nice looking div
   const fileInputRef = useRef(null)
 
@@ -27,7 +27,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
     }
   }
 
-const handleAnalyze = async () => {
+  const handleAnalyze = async () => {
     if (!selectedFile) return
     setLoading(true)
     setResult(null)
@@ -46,9 +46,9 @@ const handleAnalyze = async () => {
     } finally {
       setLoading(false)
     }
-}
+  }
 
-const handleGetRecommendations = async () => {
+  const handleGetRecommendations = async () => {
     setLoadingRecs(true)
 
     try {
@@ -66,14 +66,14 @@ const handleGetRecommendations = async () => {
     }
   }
 
-const handleSave = async () => {
+  const handleSave = async () => {
     setSavingMsg('Saving...')
 
     try {
       await axios.post('http://localhost:8000/papers/save', {
         title: result.title,
         main_category: result.main_category,
-        subcategory: result.subcategory,
+        subcategory: result.low_confidence ? "Unclassified" : result.subcategory,
         summary: result.summary,
         keywords: result.keywords,
         recommendations: recommendations || []
@@ -137,8 +137,21 @@ const handleSave = async () => {
             <div className="bg-white dark:bg-white/5 rounded-xl p-6 shadow">
               <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Classification</h2>
               <p className="text-xl font-bold text-uob-dark dark:text-white">
-                {result.main_category} <span className="text-uob-primary">›</span> {result.subcategory}
+                {result.main_category}
+                {!result.low_confidence && (
+                  <> <span className="text-uob-primary">›</span> {result.subcategory}</>
+                )}
+                {result.low_confidence && (
+                  <span className="text-gray-400 text-base ml-2">
+                    › Subcategory could not be determined confidently
+                  </span>
+                )}
               </p>
+              {result.low_confidence && (
+                <div className="mt-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 px-4 py-3 text-sm text-yellow-800 dark:text-yellow-300">
+                  Low confidence — this paper may fall outside our supported categories. Results may be inaccurate.
+                </div>
+              )}
             </div>
 
             {/* Summary */}
