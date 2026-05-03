@@ -102,4 +102,4 @@ git push
 | Summarization | Google Gemini API |
 | Keywords | YAKE |
 | Embeddings | Sentence-Transformers (all-MiniLM-L6-v2) |
-| Recommendations | arXiv API + Cosine Similarity |
+| Recommendations | semantic scholar API + Cosine Similarity |
