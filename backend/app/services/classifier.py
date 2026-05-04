@@ -1,7 +1,7 @@
 # TO BE REPLACED WITH REAL SciBERT INFERENCE
 
 # takes cleaned full text of the paper
-# returns main_category, subcategory, confidence_score, and low_confidence flag
+# returns main_category, subcategory, l1_confidence, l2_confidence, and low_confidence flag
 def classify(text: str) -> dict:
     
     l1_confidence = 0.91
