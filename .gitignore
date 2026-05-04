@@ -8,3 +8,4 @@ node_modules/
 .idea/
 *.csv
 openalex_checkpoints/
+pubmed_counts/
