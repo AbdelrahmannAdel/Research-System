@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
@@ -16,6 +16,10 @@ function App() {
   const [token, setToken] = useState(null) // default null => Logged out
   const [userName, setUserName] = useState('')
   const [darkMode, setDarkMode] = useState(true)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode)
+  }, [darkMode])
 
   const handleLogin = (accessToken, name) => {
     setToken(accessToken)

@@ -1,4 +1,6 @@
 import google.generativeai as genai
+from google.api_core.exceptions import ResourceExhausted
+from fastapi import HTTPException
 from app.core.config import settings
 
 # configure gemini with our API key from .env
@@ -15,8 +17,12 @@ Be concise and academic in tone.
 
 Text:
 {text}"""
-    
-    # API call
-    response = model.generate_content(prompt)
-    
-    return response.text
+
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except ResourceExhausted:
+        raise HTTPException(
+            status_code=503,
+            detail="Summarization service is temporarily unavailable due to API quota limits. Please try again later."
+        )
