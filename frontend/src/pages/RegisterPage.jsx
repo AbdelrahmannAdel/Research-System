@@ -1,4 +1,10 @@
-import { useState } from 'react'
+// ============================================================
+// RegisterPage.jsx
+// Restyled in the Ivory palette to match HomePage.jsx.
+// Same props, same axios endpoints, same handlers.
+// ============================================================
+
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 
@@ -9,6 +15,10 @@ function RegisterPage({ darkMode, setDarkMode }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', !!darkMode)
+  }, [darkMode])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -26,31 +36,64 @@ function RegisterPage({ darkMode, setDarkMode }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col justify-center bg-gray-100 dark:bg-uob-dark px-6 py-12 lg:px-8 relative">
+    <div className="min-h-screen relative" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+      <div className="iv-bg-fx" aria-hidden="true" />
 
-      {/* Dark/light mode toggle */}
-      <button
-        onClick={() => setDarkMode(!darkMode)}
-        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-        className="absolute top-4 right-4 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold shadow-md transition-all bg-uob-primary text-white dark:bg-white dark:text-uob-dark hover:opacity-90"
-      >
-        <span className="text-base">{darkMode ? '☀️' : '🌙'}</span>
-        {darkMode ? 'Light Mode' : 'Dark Mode'}
-      </button>
+      {/* Top brand strip */}
+      <header className="max-w-5xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between relative z-10">
+        <Link to="/login" className="flex items-center gap-2.5" style={{ textDecoration: 'none' }}>
+          <span
+            aria-hidden="true"
+            className="rounded-full"
+            style={{ width: '7px', height: '7px', background: 'var(--accent)', boxShadow: '0 0 12px var(--accent)' }}
+          />
+          <span
+            className="iv-mono font-medium"
+            style={{ fontSize: '13px', color: 'var(--text)', letterSpacing: '0.16em', textTransform: 'uppercase' }}
+          >
+            ResearchPilot
+          </span>
+        </Link>
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label="Toggle theme"
+          className="iv-nav-icon-btn"
+        >
+          {darkMode ? '☀' : '☾'}
+        </button>
+      </header>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-uob-dark dark:text-white">
-          Create an account
-        </h2>
-      </div>
+      <main className="max-w-md mx-auto px-6 pt-12 pb-20 relative z-10">
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="name" className="block text-sm/6 font-medium text-gray-700 dark:text-gray-200">
-              Full name
-            </label>
-            <div className="mt-2">
+        {/* Eyebrow + heading */}
+        <div className="mb-8">
+          <span className="iv-eyebrow"><span className="dot" /> 00 — Register</span>
+          <h1
+            className="mt-4 mb-3 leading-[1.06] tracking-[-0.025em] font-medium"
+            style={{ fontSize: 'clamp(28px, 4vw, 38px)' }}
+          >
+            Start reading.{' '}
+            <span className="iv-serif" style={{ color: 'var(--accent)' }}>
+              Differently.
+            </span>
+          </h1>
+          <p className="text-[14.5px] leading-relaxed" style={{ color: 'var(--text-mute)' }}>
+            Create an account to upload research papers and build your personal library.
+          </p>
+        </div>
+
+        {/* Form panel */}
+        <section className="iv-panel p-7 relative overflow-hidden">
+          <div
+            aria-hidden="true"
+            className="absolute top-0 left-0 right-0 h-px opacity-50"
+            style={{ background: 'linear-gradient(90deg, transparent, var(--accent), transparent)' }}
+          />
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="name" className="iv-label">Full name</label>
               <input
                 id="name"
                 type="text"
@@ -59,16 +102,13 @@ function RegisterPage({ darkMode, setDarkMode }) {
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-uob-primary sm:text-sm/6"
+                className="iv-input"
+                placeholder="Mohamed Yaser"
               />
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm/6 font-medium text-gray-700 dark:text-gray-200">
-              Email address
-            </label>
-            <div className="mt-2">
+            <div>
+              <label htmlFor="email" className="iv-label">Email</label>
               <input
                 id="email"
                 type="email"
@@ -77,16 +117,13 @@ function RegisterPage({ darkMode, setDarkMode }) {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-uob-primary sm:text-sm/6"
+                className="iv-input"
+                placeholder="you@university.edu"
               />
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm/6 font-medium text-gray-700 dark:text-gray-200">
-              Password
-            </label>
-            <div className="mt-2">
+            <div>
+              <label htmlFor="password" className="iv-label">Password</label>
               <input
                 id="password"
                 type="password"
@@ -95,31 +132,80 @@ function RegisterPage({ darkMode, setDarkMode }) {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full rounded-md bg-white dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-uob-primary sm:text-sm/6"
+                className="iv-input"
+                placeholder="At least 8 characters"
               />
             </div>
-          </div>
 
-          {error && (
-            <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
-          )}
+            {error && (
+              <div
+                className="iv-mono text-[12px] px-3 py-2 rounded-md"
+                style={{
+                  background: 'color-mix(in srgb, var(--danger) 10%, transparent)',
+                  color: 'var(--danger)',
+                  border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)',
+                  letterSpacing: '0.02em',
+                }}
+              >
+                {error}
+              </div>
+            )}
 
-          <div>
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-md bg-uob-primary px-3 py-1.5 text-sm/6 font-semibold text-white hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-uob-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="iv-btn iv-btn-accent w-full justify-center flex items-center gap-2"
+              style={{ paddingTop: '12px', paddingBottom: '12px' }}
             >
-              {loading ? 'Creating account...' : 'Register'}
+              {loading && (
+                <span
+                  className="animate-spin inline-block rounded-full"
+                  style={{
+                    width: '13px', height: '13px',
+                    border: '1.5px solid rgba(255,255,255,0.35)',
+                    borderTopColor: 'currentColor',
+                  }}
+                />
+              )}
+              {loading ? 'Creating account…' : 'Create account →'}
             </button>
-          </div>
-        </form>
+          </form>
+        </section>
 
-        <p className="mt-10 text-center text-sm/6 text-gray-500 dark:text-gray-400">
+        {/* Footer link */}
+        <p
+          className="mt-7 text-center text-[14px]"
+          style={{ color: 'var(--text-mute)' }}
+        >
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-uob-primary hover:opacity-80">Sign in</Link>
+          <Link
+            to="/login"
+            className="iv-serif"
+            style={{ color: 'var(--accent)', textDecoration: 'none', borderBottom: '1px solid currentColor', paddingBottom: '1px' }}
+          >
+            Sign in
+          </Link>
         </p>
-      </div>
+
+        {/* Footer */}
+        <footer
+          className="mt-20 pt-6 flex justify-between"
+          style={{ borderTop: '1px solid var(--line)' }}
+        >
+          <span
+            className="iv-mono text-[11px]"
+            style={{ color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+          >
+            ResearchPilot · v1.0
+          </span>
+          <span
+            className="iv-mono text-[11px]"
+            style={{ color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+          >
+            Senior capstone
+          </span>
+        </footer>
+      </main>
     </div>
   )
 }
