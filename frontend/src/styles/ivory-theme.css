@@ -1,0 +1,352 @@
+/* =============================================================
+   ivory-theme.css
+   Shared Ivory color tokens and utility classes for the React app.
+
+   USAGE (one-time setup):
+   1. Drop this file into src/styles/ivory-theme.css
+   2. Import once at the top of src/main.jsx (or main.tsx):
+        import './styles/ivory-theme.css'
+   3. In tailwind.config.js, ensure: darkMode: 'class'
+   4. Toggle by adding/removing the `dark` class on <html>:
+        document.documentElement.classList.toggle('dark', isDark)
+   5. Persist in localStorage with key 'rp-theme' (matches the marketing site)
+
+   COLOR DECISIONS:
+   - Light mode: warm cream surfaces, deep navy primary, purple secondary.
+   - Dark mode: warm dark brown-black, lightened navy + lavender accents.
+   - All transitions are scoped to surfaces — pointer states stay fast.
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+:root {
+  /* Surfaces */
+  --bg:        #f8f5ec;
+  --bg-2:      #f2eed4;
+  --panel:     #ede7d4;
+  --panel-2:   #e6e0c8;
+  --panel-3:   #ddd5b8;
+
+  /* Lines */
+  --line:      rgba(28, 24, 20, 0.10);
+  --line-2:    rgba(28, 24, 20, 0.18);
+  --line-3:    rgba(28, 24, 20, 0.30);
+
+  /* Text */
+  --text:      #1a1814;
+  --text-mute: #6b645a;
+  --text-dim:  #9a9488;
+
+  /* Accents */
+  --accent:    #2a5db0;
+  --accent-h:  #1d4a96;
+  --accent-2:  #7c4dba;
+  --warn:      #b86200;
+  --ok:        #2d7a3e;
+  --danger:    #b8312b;
+
+  /* Atmospheric */
+  --grid-dot:  rgba(28, 24, 20, 0.08);
+  --blob-1:    rgba(42, 93, 176, 0.10);
+  --blob-2:    rgba(124, 77, 186, 0.08);
+  --grain-blend: multiply;
+  --grain-opacity: 0.025;
+
+  /* Buttons */
+  --btn-primary-bg:   #1a1814;
+  --btn-primary-bg-h: #2a2820;
+  --btn-primary-fg:   #f8f5ec;
+  --btn-accent-bg:    var(--accent);
+  --btn-accent-bg-h:  var(--accent-h);
+  --btn-accent-fg:    #ffffff;
+
+  --sel-bg: var(--accent);
+  --sel-fg: #ffffff;
+
+  color-scheme: light;
+}
+
+html.dark {
+  --bg:        #10100e;
+  --bg-2:      #161412;
+  --panel:     #1e1c18;
+  --panel-2:   #24221c;
+  --panel-3:   #2c2922;
+
+  --line:      rgba(236, 232, 220, 0.08);
+  --line-2:    rgba(236, 232, 220, 0.14);
+  --line-3:    rgba(236, 232, 220, 0.24);
+
+  --text:      #ece8dc;
+  --text-mute: #8a8474;
+  --text-dim:  #5e584c;
+
+  --accent:    #6daaee;
+  --accent-h:  #8cbcf2;
+  --accent-2:  #a07edd;
+  --warn:      #f5a623;
+  --ok:        #7cd886;
+  --danger:    #e8786a;
+
+  --grid-dot:  rgba(236, 232, 220, 0.045);
+  --blob-1:    rgba(109, 170, 238, 0.10);
+  --blob-2:    rgba(160, 126, 221, 0.08);
+  --grain-blend: overlay;
+  --grain-opacity: 0.05;
+
+  --btn-primary-bg:   #ece8dc;
+  --btn-primary-bg-h: #f5f2e6;
+  --btn-primary-fg:   #10100e;
+  --btn-accent-bg:    var(--accent);
+  --btn-accent-bg-h:  var(--accent-h);
+  --btn-accent-fg:    #0a1424;
+
+  --sel-bg: var(--accent);
+  --sel-fg: #0a1424;
+
+  color-scheme: dark;
+}
+
+/* Base */
+html, body { background: var(--bg); }
+body {
+  color: var(--text);
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01","cv11";
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s ease, color 0.3s ease;
+}
+::selection { background: var(--sel-bg); color: var(--sel-fg); }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.animate-spin):not(.iv-spinner), *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============ Reusable Ivory utility classes ============ */
+
+.iv-mono  { font-family: 'Geist Mono', ui-monospace, monospace; }
+.iv-serif { font-family: 'Instrument Serif', 'Times New Roman', serif; font-style: italic; }
+
+.iv-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Geist Mono', monospace; font-size: 11.5px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-mute);
+}
+.iv-eyebrow .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+/* Panels */
+.iv-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  transition: background-color 0.4s ease, border-color 0.2s ease;
+}
+.iv-panel-2 {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  transition: background-color 0.4s ease, border-color 0.2s ease;
+}
+
+/* Buttons */
+.iv-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  border: 1px solid var(--line-2);
+  color: var(--text); background: transparent;
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+.iv-btn:hover:not(:disabled) {
+  border-color: var(--line-3);
+  background: var(--panel);
+  transform: translateY(-1px);
+}
+.iv-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.iv-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.iv-btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border-color: transparent;
+  font-weight: 600;
+}
+.iv-btn-primary:hover:not(:disabled) {
+  background: var(--btn-primary-bg-h);
+  box-shadow: 0 8px 24px -8px var(--line-3);
+}
+
+.iv-btn-accent {
+  background: var(--btn-accent-bg);
+  color: var(--btn-accent-fg);
+  border-color: transparent;
+  font-weight: 600;
+}
+.iv-btn-accent:hover:not(:disabled) {
+  background: var(--btn-accent-bg-h);
+  box-shadow: 0 8px 24px -8px var(--accent);
+}
+
+/* Pills / tags */
+.iv-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 999px;
+  font-size: 12.5px; font-family: 'Geist Mono', monospace; letter-spacing: 0.04em;
+  border: 1px solid var(--line-2);
+  background: var(--panel-2);
+  color: var(--text-mute);
+  transition: background-color 0.4s ease, border-color 0.2s ease;
+}
+.iv-pill-accent {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.iv-pill-violet {
+  background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+  color: var(--accent-2);
+  border-color: color-mix(in srgb, var(--accent-2) 30%, transparent);
+}
+
+/* Form / dropzone */
+.iv-dropzone {
+  border: 1.5px dashed var(--line-2);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--panel) 50%, transparent);
+  transition: border-color 0.2s ease, background-color 0.4s ease;
+  cursor: pointer;
+}
+.iv-dropzone:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line-2));
+  background: var(--panel-2);
+}
+
+/* Confidence / similarity bar */
+.iv-bar {
+  height: 6px; border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  overflow: hidden;
+}
+.iv-bar > span {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(.4,.7,.2,1);
+}
+
+/* Page background atmospherics (optional - apply to body wrapper) */
+.iv-bg-fx {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+  background:
+    radial-gradient(circle at 1px 1px, var(--grid-dot) 1px, transparent 0) 0 0 / 24px 24px,
+    radial-gradient(1200px 800px at 80% -10%, var(--blob-1), transparent 60%),
+    radial-gradient(900px 700px at -10% 30%, var(--blob-2), transparent 60%),
+    var(--bg);
+  transition: background 0.4s ease;
+}
+
+/* Scrollbar */
+* { scrollbar-color: var(--line-2) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 999px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--line-3); }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Spinner */
+@keyframes iv-spin { to { transform: rotate(360deg); } }
+.iv-spinner {
+  border: 1.5px solid var(--line-2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: iv-spin 0.65s linear infinite;
+}
+
+/* Form inputs */
+.iv-label {
+  display: block;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin-bottom: 8px;
+}
+.iv-input {
+  display: block;
+  width: 100%;
+  padding: 11px 13px;
+  background: color-mix(in srgb, var(--bg) 70%, var(--panel));
+  border: 1px solid var(--line-2);
+  border-radius: 9px;
+  color: var(--text);
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14.5px;
+  letter-spacing: -0.005em;
+  transition: border-color 0.18s ease, background-color 0.4s ease, box-shadow 0.18s ease;
+}
+.iv-input:hover { border-color: var(--line-3); }
+.iv-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.iv-input::placeholder { color: var(--text-dim); }
+
+/* Top nav */
+.iv-nav {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--line);
+  transition: background-color 0.4s ease, border-color 0.2s ease;
+}
+.iv-nav-link {
+  position: relative;
+  display: inline-flex; align-items: center;
+  padding: 8px 12px;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-mute);
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+.iv-nav-link:hover { color: var(--text); }
+.iv-nav-link.active { color: var(--accent); }
+.iv-nav-link.active::after {
+  content: '';
+  position: absolute; left: 12px; right: 12px; bottom: -1px;
+  height: 1px; background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.iv-nav-icon-btn {
+  display: inline-grid; place-items: center;
+  width: 32px; height: 32px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  color: var(--text-mute);
+  background: transparent;
+  font-size: 14px;
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+.iv-nav-icon-btn:hover {
+  color: var(--text);
+  border-color: var(--line-3);
+  background: var(--panel);
+}
