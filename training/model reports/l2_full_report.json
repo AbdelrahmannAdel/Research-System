@@ -1,0 +1,267 @@
+{
+  "Accounting": {
+    "precision": 0.8435613682092555,
+    "recall": 0.8397596394591887,
+    "f1-score": 0.8416562107904643,
+    "support": 1997.0
+  },
+  "Algebra": {
+    "precision": 0.9532428355957768,
+    "recall": 0.948,
+    "f1-score": 0.9506141890198044,
+    "support": 2000.0
+  },
+  "Analysis": {
+    "precision": 0.9261916965658636,
+    "recall": 0.9035,
+    "f1-score": 0.914705137939762,
+    "support": 2000.0
+  },
+  "Analytical Chemistry": {
+    "precision": 0.9060370009737099,
+    "recall": 0.9314314314314315,
+    "f1-score": 0.918558736426456,
+    "support": 1998.0
+  },
+  "Artificial Intelligence": {
+    "precision": 0.8067180616740088,
+    "recall": 0.730309072781655,
+    "f1-score": 0.7666143380429095,
+    "support": 2006.0
+  },
+  "Astrophysics": {
+    "precision": 0.9641025641025641,
+    "recall": 0.94,
+    "f1-score": 0.9518987341772152,
+    "support": 2000.0
+  },
+  "Cardiology": {
+    "precision": 0.8768298838970217,
+    "recall": 0.8685,
+    "f1-score": 0.8726450640542577,
+    "support": 2000.0
+  },
+  "Chemical Engineering": {
+    "precision": 0.9589794897448725,
+    "recall": 0.9594594594594594,
+    "f1-score": 0.9592194145609206,
+    "support": 1998.0
+  },
+  "Civil & Structural Engineering": {
+    "precision": 0.9473417721518987,
+    "recall": 0.9364364364364365,
+    "f1-score": 0.9418575383840926,
+    "support": 1998.0
+  },
+  "Combinatorics": {
+    "precision": 0.9339095068632435,
+    "recall": 0.9185,
+    "f1-score": 0.9261406604487018,
+    "support": 2000.0
+  },
+  "Condensed Matter": {
+    "precision": 0.9288597376387487,
+    "recall": 0.9205,
+    "f1-score": 0.9246609743847313,
+    "support": 2000.0
+  },
+  "Cryptography & Security": {
+    "precision": 0.9275220372184133,
+    "recall": 0.9451097804391217,
+    "f1-score": 0.9362333168561542,
+    "support": 2004.0
+  },
+  "Data Structures & Algorithms": {
+    "precision": 0.9351351351351351,
+    "recall": 0.9505494505494505,
+    "f1-score": 0.9427792915531336,
+    "support": 2002.0
+  },
+  "Econometrics": {
+    "precision": 0.8326612903225806,
+    "recall": 0.8268268268268268,
+    "f1-score": 0.8297338021094928,
+    "support": 1998.0
+  },
+  "Electrical & Electronic Engineering": {
+    "precision": 0.9123143267848587,
+    "recall": 0.9534301452178268,
+    "f1-score": 0.9324191968658179,
+    "support": 1997.0
+  },
+  "Electrochemistry": {
+    "precision": 0.8983656792645557,
+    "recall": 0.8799399699849925,
+    "f1-score": 0.8890573666919384,
+    "support": 1999.0
+  },
+  "Finance": {
+    "precision": 0.862394436164928,
+    "recall": 0.8697394789579158,
+    "f1-score": 0.8660513843851334,
+    "support": 1996.0
+  },
+  "Genetics & Molecular Biology": {
+    "precision": 0.8303266699171136,
+    "recall": 0.8515,
+    "f1-score": 0.8407800543075784,
+    "support": 2000.0
+  },
+  "High Energy Physics": {
+    "precision": 0.8938284518828452,
+    "recall": 0.8545,
+    "f1-score": 0.873721881390593,
+    "support": 2000.0
+  },
+  "Immunology & Microbiology": {
+    "precision": 0.8194097048524263,
+    "recall": 0.819,
+    "f1-score": 0.8192048012003,
+    "support": 2000.0
+  },
+  "Industrial & Manufacturing Engineering": {
+    "precision": 0.9513540621865597,
+    "recall": 0.9499248873309964,
+    "f1-score": 0.9506389376096217,
+    "support": 1997.0
+  },
+  "Inorganic Chemistry": {
+    "precision": 0.8988821138211383,
+    "recall": 0.8845,
+    "f1-score": 0.891633064516129,
+    "support": 2000.0
+  },
+  "Machine Learning": {
+    "precision": 0.8609375,
+    "recall": 0.8227974116475859,
+    "f1-score": 0.8414354797658438,
+    "support": 2009.0
+  },
+  "Management": {
+    "precision": 0.7990726429675425,
+    "recall": 0.7770541082164328,
+    "f1-score": 0.7879095758191517,
+    "support": 1996.0
+  },
+  "Management Information Systems": {
+    "precision": 0.8749394086282113,
+    "recall": 0.9034034034034034,
+    "f1-score": 0.8889436099482886,
+    "support": 1998.0
+  },
+  "Marketing": {
+    "precision": 0.9026593075765178,
+    "recall": 0.900851276915373,
+    "f1-score": 0.9017543859649123,
+    "support": 1997.0
+  },
+  "Mathematical Physics": {
+    "precision": 0.8699751861042183,
+    "recall": 0.8769384692346173,
+    "f1-score": 0.8734429496761336,
+    "support": 1999.0
+  },
+  "Mechanical Engineering": {
+    "precision": 0.8942928039702234,
+    "recall": 0.9014507253626813,
+    "f1-score": 0.8978574987543597,
+    "support": 1999.0
+  },
+  "Natural Language Processing": {
+    "precision": 0.8560641812175555,
+    "recall": 0.906093906093906,
+    "f1-score": 0.880368842513953,
+    "support": 2002.0
+  },
+  "Neuroscience": {
+    "precision": 0.8831494483450351,
+    "recall": 0.8805,
+    "f1-score": 0.8818227341011518,
+    "support": 2000.0
+  },
+  "Numerical Analysis": {
+    "precision": 0.9162487462387161,
+    "recall": 0.9135,
+    "f1-score": 0.9148723084626941,
+    "support": 2000.0
+  },
+  "Oncology": {
+    "precision": 0.8581314878892734,
+    "recall": 0.868,
+    "f1-score": 0.8630375341784737,
+    "support": 2000.0
+  },
+  "Optimization & Control": {
+    "precision": 0.9047156052503647,
+    "recall": 0.9305,
+    "f1-score": 0.9174266699531674,
+    "support": 2000.0
+  },
+  "Organic Chemistry": {
+    "precision": 0.8563931297709924,
+    "recall": 0.8975,
+    "f1-score": 0.87646484375,
+    "support": 2000.0
+  },
+  "Pharmacology": {
+    "precision": 0.779600205023065,
+    "recall": 0.7605,
+    "f1-score": 0.7699316628701595,
+    "support": 2000.0
+  },
+  "Physical and Theoretical Chemistry": {
+    "precision": 0.8431761786600497,
+    "recall": 0.8503503503503503,
+    "f1-score": 0.8467480687764765,
+    "support": 1998.0
+  },
+  "Probability": {
+    "precision": 0.9157688540646425,
+    "recall": 0.935,
+    "f1-score": 0.9252845126175161,
+    "support": 2000.0
+  },
+  "Quantum Physics": {
+    "precision": 0.9013452914798207,
+    "recall": 0.9045,
+    "f1-score": 0.9029198901921637,
+    "support": 2000.0
+  },
+  "Relativity & Gravity": {
+    "precision": 0.8589503280224929,
+    "recall": 0.9165,
+    "f1-score": 0.8867924528301887,
+    "support": 2000.0
+  },
+  "Robotics": {
+    "precision": 0.917821309125657,
+    "recall": 0.9600199900049975,
+    "f1-score": 0.9384465070835368,
+    "support": 2001.0
+  },
+  "Spectroscopy": {
+    "precision": 0.8911671924290221,
+    "recall": 0.8479239619809905,
+    "f1-score": 0.8690079466803384,
+    "support": 1999.0
+  },
+  "Systems & Control": {
+    "precision": 0.9468473163105784,
+    "recall": 0.9085,
+    "f1-score": 0.9272773666751722,
+    "support": 2000.0
+  },
+  "accuracy": 0.8891151116826214,
+  "macro avg": {
+    "precision": 0.8890291416200358,
+    "recall": 0.8891261948115627,
+    "f1-score": 0.8888706889602117,
+    "support": 83988.0
+  },
+  "weighted avg": {
+    "precision": 0.8890257101418085,
+    "recall": 0.8891151116826214,
+    "f1-score": 0.8888632354135098,
+    "support": 83988.0
+  }
+}
