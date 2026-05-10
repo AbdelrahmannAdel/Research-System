@@ -59,36 +59,41 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
     setSaved(false)
     setSavingMsg('')
 
-    await new Promise(r => setTimeout(r, 2000))
+    try {
+      const formData = new FormData()
+      formData.append('file', selectedFile)
 
-    setResult({
-      title: 'Attention Is All You Need',
-      main_category: 'Computer Science',
-      subcategory: 'Machine Learning',
-      summary: 'This paper proposes the Transformer, a novel neural network architecture based entirely on attention mechanisms, dispensing with recurrence and convolutions entirely. The model achieves superior quality on machine translation tasks while being more parallelizable and requiring significantly less training time. Experiments on English-to-German and English-to-French translation benchmarks demonstrate state-of-the-art performance, establishing attention-only models as a compelling alternative to recurrent and convolutional sequence models.',
-      keywords: ['attention mechanism', 'transformer', 'neural machine translation', 'self-attention', 'multi-head attention', 'positional encoding', 'encoder-decoder', 'sequence modeling'],
-      l1_confidence: 0.97,
-      l2_confidence: 0.94,
-      low_confidence: false,
-    })
-
-    setLoading(false)
+      const response = await axios.post('http://localhost:8000/papers/upload', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        }
+      })
+      setResult(response.data)
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Analysis failed. Check the backend logs.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleGetRecommendations = async () => {
+    if (!result) return
     setLoadingRecs(true)
 
-    await new Promise(r => setTimeout(r, 1500))
-
-    setRecommendations([
-      { title: 'BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding', authors: 'Devlin et al.', abstract: 'We introduce BERT, a new language representation model designed to pre-train deep bidirectional representations from unlabeled text.', url: 'https://arxiv.org/abs/1810.04805', similarity: 0.91 },
-      { title: 'An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale', authors: 'Dosovitskiy et al.', abstract: 'We apply a pure transformer directly to sequences of image patches and find it performs excellently on image classification tasks.', url: 'https://arxiv.org/abs/2010.11929', similarity: 0.87 },
-      { title: 'GPT-3: Language Models are Few-Shot Learners', authors: 'Brown et al.', abstract: 'We demonstrate that scaling language models greatly improves task-agnostic, few-shot performance across many NLP tasks.', url: 'https://arxiv.org/abs/2005.14165', similarity: 0.84 },
-      { title: 'Deep Residual Learning for Image Recognition', authors: 'He et al.', abstract: 'We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously.', url: 'https://arxiv.org/abs/1512.03385', similarity: 0.79 },
-      { title: 'Generative Adversarial Networks', authors: 'Goodfellow et al.', abstract: 'We propose a new framework for estimating generative models via an adversarial process involving a generative and discriminative model.', url: 'https://arxiv.org/abs/1406.2661', similarity: 0.75 },
-    ])
-
-    setLoadingRecs(false)
+    try {
+      const response = await axios.post('http://localhost:8000/papers/recommend', {
+        title: result.title,
+        keywords: result.keywords,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setRecommendations(response.data)
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Failed to fetch recommendations.')
+    } finally {
+      setLoadingRecs(false)
+    }
   }
 
   const handleSave = async () => {
@@ -112,7 +117,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
     }
   }
 
-  // Confidence value for the bar (97.2% if not low_confidence, else show the warn state)
   const confidence = result && !result.low_confidence ? 0.972 : 0.45
 
   return (
@@ -123,7 +127,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
 
       <main className="max-w-5xl mx-auto px-6 pt-12 pb-24 relative z-10">
 
-        {/* ============ Page header ============ */}
         <header className="mb-10">
           <span className="iv-eyebrow"><span className="dot" /> 01 — Analyze</span>
           <h1
@@ -136,12 +139,11 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
             </span>
           </h1>
           <p className="text-base leading-relaxed max-w-[56ch]" style={{ color: 'var(--text-mute)' }}>
-            Upload a research PDF and get back classification, summary, keywords, and ten arXiv
-            recommendations re-ranked by semantic similarity.
+            Upload a research PDF and get back classification, summary, keywords, and ten Semantic Scholar
+            recommendations re-ranked by cosine similarity.
           </p>
         </header>
 
-        {/* ============ Upload card ============ */}
         <section className="iv-panel p-6 sm:p-8 relative overflow-hidden">
           <div
             aria-hidden="true"
@@ -150,7 +152,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
           />
 
           <div className="grid gap-6 md:grid-cols-[1.4fr_1fr]">
-            {/* Dropzone */}
             <div
               onClick={() => fileInputRef.current?.click()}
               role="button"
@@ -159,7 +160,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
               className="iv-dropzone flex items-center gap-4 px-5 py-6 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               style={{ '--tw-ring-color': 'var(--accent)' }}
             >
-              {/* File glyph */}
               <div
                 className="w-11 h-14 flex-shrink-0 relative rounded"
                 style={{
@@ -226,16 +226,14 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
               onChange={handleFileChange}
             />
 
-            {/* Pipeline checklist */}
             <div className="flex flex-col gap-2.5 justify-center">
-              <PipeStep label="Extract — PyMuPDF"  done={!!result} loading={loading} />
-              <PipeStep label="Classify — SciBERT" done={!!result} loading={loading} />
-              <PipeStep label="Summarize — Gemini" done={!!result} loading={loading} />
-              <PipeStep label="Recommend — arXiv"  done={!!recommendations} loading={loadingRecs} />
+              <PipeStep label="Extract Keywords"  done={!!result} loading={loading} />
+              <PipeStep label="Classify" done={!!result} loading={loading} />
+              <PipeStep label="Summarize" done={!!result} loading={loading} />
+              <PipeStep label="Recommend"  done={!!recommendations} loading={loadingRecs} />
             </div>
           </div>
 
-          {/* Action row */}
           <div
             className="mt-6 pt-5 flex flex-wrap items-center gap-3"
             style={{ borderTop: '1px solid var(--line)' }}
@@ -270,13 +268,12 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
                 className="iv-mono text-[11.5px]"
                 style={{ color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
               >
-                SciBERT · Gemini · YAKE · arXiv
+                SciBERT · Gemini · YAKE · Semantic Scholar reranked by cosine similarity
               </span>
             )}
           </div>
         </section>
 
-        {/* ============ Results ============ */}
         {result && (
           <section className="mt-16">
             <div
@@ -294,7 +291,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
               </span>
             </div>
 
-            {/* Detected title */}
             <div className="mb-7">
               <div
                 className="iv-mono mb-2"
@@ -310,7 +306,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
               </h3>
             </div>
 
-            {/* Low-confidence banner */}
             {result.low_confidence && (
               <div
                 className="iv-panel-2 mb-4 p-4 text-sm"
@@ -324,10 +319,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
               </div>
             )}
 
-            {/* Panel grid: classification + keywords side-by-side, summary full width */}
             <div className="grid gap-3.5 md:grid-cols-2">
-
-              {/* Classification */}
               <div className="iv-panel p-5">
                 <h4
                   className="iv-mono mb-3.5 flex items-center gap-2 font-medium"
@@ -361,18 +353,17 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
                     Confidence
                   </span>
                   <div className="iv-bar flex-1">
-                    <span style={{ width: `${(confidence * 100).toFixed(1)}%` }} />
+                    <span style={{ width: `${(result.l1_confidence * 100).toFixed(1)}%` }} />
                   </div>
                   <span
                     className="iv-mono font-medium"
                     style={{ fontSize: '13px', color: 'var(--accent)' }}
                   >
-                    {confidence.toFixed(3)}
+                    {result.l1_confidence.toFixed(3)}
                   </span>
                 </div>
               </div>
 
-              {/* Keywords */}
               <div className="iv-panel p-5">
                 <h4
                   className="iv-mono mb-3.5 flex items-center gap-2 font-medium"
@@ -393,7 +384,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
                 </div>
               </div>
 
-              {/* Summary - full width */}
               <div className="iv-panel p-5 md:col-span-2">
                 <h4
                   className="iv-mono mb-3.5 flex items-center gap-2 font-medium"
@@ -416,7 +406,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
               </div>
             </div>
 
-            {/* Action bar */}
             <div
               className="mt-5 p-4 flex items-center gap-2.5 flex-wrap iv-panel"
               style={{ background: 'color-mix(in srgb, var(--panel) 60%, transparent)' }}
@@ -461,7 +450,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
           </section>
         )}
 
-        {/* ============ Recommendations ============ */}
         {recommendations && recommendations.length > 0 && (
           <section className="mt-16">
             <div
@@ -478,7 +466,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
                 className="iv-mono text-[11.5px]"
                 style={{ color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
               >
-                arXiv · re-ranked by Sentence-BERT cosine
+                Semantic Scholar · re-ranked by Sentence-BERT cosine
               </span>
             </div>
 
@@ -490,7 +478,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
           </section>
         )}
 
-        {/* Footer */}
         <footer
           className="mt-24 pt-9 flex flex-wrap justify-between gap-3"
           style={{ borderTop: '1px solid var(--line)' }}
@@ -512,8 +499,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
     </div>
   )
 }
-
-/* ============ Sub-components ============ */
 
 function PipeStep({ label, done, loading }) {
   return (
