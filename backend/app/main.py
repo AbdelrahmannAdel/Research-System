@@ -3,19 +3,29 @@
 # sets up CORS, creates database tables, and registers all API routers.
 # Run with: uvicorn app.main:app --reload
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.api import auth, papers
 from app.models import paper
+from app.services.classifier import initialize_models
 
-# Create all database tables on startup if they don't already exist.
-# SQLAlchemy looks at all models that inherit from Base (User, SavedPaper)
-# and creates their corresponding tables in PostgreSQL automatically.
-Base.metadata.create_all(bind=engine)
+# Define lifespan context manager for startup/shutdown events
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: create tables and load models
+    print("Creating database tables...")
+    Base.metadata.create_all(bind=engine)
+    print("Loading classification models...")
+    initialize_models()
+    print("Models loaded. Ready to serve.")
+    yield
+    # Shutdown: any cleanup if needed (optional)
+    print("Shutting down...")
 
-# Create the main FastAPI application instance
-app = FastAPI(title="Research Paper AI System")
+# Create the main FastAPI application instance with lifespan
+app = FastAPI(title="Research Paper AI System", lifespan=lifespan)
 
 # Configure CORS
 # Our frontend runs on localhost:5173 and backend on localhost:8000, different origins.
