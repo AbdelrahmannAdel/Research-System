@@ -118,7 +118,7 @@ function ProfilePage({ userName, darkMode, setDarkMode, onLogout, token }) {
             className="iv-mono text-[11.5px]"
             style={{ color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
           >
-            Senior capstone · [University] [Year]
+            Senior Project · University of Bahrain 2026
           </span>
         </footer>
       </main>
