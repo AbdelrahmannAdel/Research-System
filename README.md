@@ -74,19 +74,6 @@ npm run dev
 ```
 
 Runs at http://localhost:5173
-
----
-
-## Daily Workflow
-
-```bash
-git pull
-# make your changes
-git add .
-git commit -m "what you did"
-git push
-```
-
 ---
 
 ## Tech Stack
