@@ -1,4 +1,5 @@
-# AI-Based Research Paper Intelligence System
+# AI-Based Research Paper Classifier and Summarizer
+# Research Pilot
 
 A senior capstone project that automatically classifies, summarizes, extracts keywords from, and recommends similar papers for any uploaded research paper PDF
 
