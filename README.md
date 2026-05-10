@@ -1,4 +1,5 @@
-# AI-Based Research Paper Intelligence System
+# AI-Based Research Paper Classifier and Summarizer
+# Research Pilot
 
 A senior capstone project that automatically classifies, summarizes, extracts keywords from, and recommends similar papers for any uploaded research paper PDF
 
@@ -74,19 +75,6 @@ npm run dev
 ```
 
 Runs at http://localhost:5173
-
----
-
-## Daily Workflow
-
-```bash
-git pull
-# make your changes
-git add .
-git commit -m "what you did"
-git push
-```
-
 ---
 
 ## Tech Stack
