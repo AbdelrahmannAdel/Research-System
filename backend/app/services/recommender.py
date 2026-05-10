@@ -1,9 +1,6 @@
 import requests
 from sentence_transformers import SentenceTransformer, util
 
-# load the embedding model once at module level so it isn't reloaded on every request
-model = SentenceTransformer("all-MiniLM-L6-v2")
-
 # fetch 20 candidate papers from Semantic Scholar using title and keywords
 # then re-rank by cosine similarity and return top 10
 def get_recommendations(title: str, keywords: list) -> list:
@@ -57,6 +54,8 @@ def get_recommendations(title: str, keywords: list) -> list:
     # if the API returned nothing useful, return empty list
     if not candidates:
         return []
+    
+    model = SentenceTransformer("all-MiniLM-L6-v2")
 
     # embed the uploaded paper query (title + keywords) into a vector
     uploaded_embedding = model.encode(" ".join(query_terms), convert_to_tensor=True)
