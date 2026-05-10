@@ -88,6 +88,8 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       })
+      console.log('Recommendations received:', response.data)  // add this
+      console.log('Count:', response.data.length)
       setRecommendations(response.data)
     } catch (err) {
       alert(err.response?.data?.detail || 'Failed to fetch recommendations.')
@@ -268,7 +270,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
                 className="iv-mono text-[11.5px]"
                 style={{ color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
               >
-                SciBERT · Gemini · YAKE · Semantic Scholar reranked by cosine similarity
               </span>
             )}
           </div>
@@ -281,7 +282,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
               style={{ borderBottom: '1px solid var(--line)' }}
             >
               <h2 className="text-[22px] font-medium tracking-[-0.01em]">
-                Analysis <span className="iv-serif font-normal" style={{ color: 'var(--text-mute)' }}>— results</span>
+                Analysis <span className="iv-serif font-normal" style={{ color: 'var(--text-mute)' }}> results</span>
               </h2>
               <span
                 className="iv-mono text-[11.5px]"
@@ -492,7 +493,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
             className="iv-mono text-[11.5px]"
             style={{ color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
           >
-            Senior capstone · University of Bahrain 2026
+            Senior Project · University of Bahrain 2026
           </span>
         </footer>
       </main>

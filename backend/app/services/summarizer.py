@@ -1,15 +1,9 @@
-import google.generativeai as genai
-from google.api_core.exceptions import ResourceExhausted
+from google import genai
 from fastapi import HTTPException
 from app.core.config import settings
 
-# configure gemini with our API key from .env
-genai.configure(api_key=settings.GEMINI_API_KEY)
+client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-# use gemini 2.0 flash
-model = genai.GenerativeModel("gemini-2.0-flash")
-
-# send text to gemini and return a 4-5 sentence summary of the research
 def summarize(text: str) -> str:
     prompt = f"""You are a research paper summarizer.
 Read the following text from a research paper and write a single well-structured paragraph that summarizes the paper's main objective, methodology, and findings.
@@ -19,10 +13,14 @@ Text:
 {text}"""
 
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
         return response.text
-    except ResourceExhausted:
+    except Exception as e:
+        print(f"[summarizer] ERROR: {type(e).__name__}: {e}")
         raise HTTPException(
             status_code=503,
-            detail="Summarization service is temporarily unavailable due to API quota limits. Please try again later."
+            detail=f"Summarization failed: {str(e)}"
         )

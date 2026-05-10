@@ -200,7 +200,7 @@ def classify_text(text, l1_model, l2_model, tokenizer, device, threshold=0.6):
     # Note: l2_conf is from softmax over all 42 logits (with 36 masked to -inf),
     # not a pure 6-class softmax. Scores are lower as a result. The threshold
     # of 0.6 was chosen with this in mind.
-    low_confidence = (l2_conf < threshold)
+    low_confidence = bool(l2_conf < threshold)
     if low_confidence:
         subcategory = "Unclassified"
     
@@ -209,7 +209,7 @@ def classify_text(text, l1_model, l2_model, tokenizer, device, threshold=0.6):
         "subcategory": subcategory,
         "l1_confidence": float(l1_conf),
         "l2_confidence": float(l2_conf),
-        "low_confidence": low_confidence
+        "low_confidence": bool(low_confidence)
     }
 
 # Stub replacement: the existing endpoint calls this function

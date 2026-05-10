@@ -1,6 +1,9 @@
 import requests
 from sentence_transformers import SentenceTransformer, util
 
+# Load once at startup, not on every call
+_embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+
 # fetch 20 candidate papers from Semantic Scholar using title and keywords
 # then re-rank by cosine similarity and return top 10
 def get_recommendations(title: str, keywords: list) -> list:
@@ -54,15 +57,13 @@ def get_recommendations(title: str, keywords: list) -> list:
     # if the API returned nothing useful, return empty list
     if not candidates:
         return []
-    
-    model = SentenceTransformer("all-MiniLM-L6-v2")
 
     # embed the uploaded paper query (title + keywords) into a vector
-    uploaded_embedding = model.encode(" ".join(query_terms), convert_to_tensor=True)
+    uploaded_embedding = _embedding_model.encode(" ".join(query_terms), convert_to_tensor=True)
 
     # embed all candidate abstracts into vectors
     abstracts = [c["abstract"] for c in candidates]
-    candidate_embeddings = model.encode(abstracts, convert_to_tensor=True)
+    candidate_embeddings = _embedding_model.encode(abstracts, convert_to_tensor=True)
 
     # compute cosine similarity between the uploaded paper and each candidate
     # scores[i] is a float between -1 and 1, where 1 means identical
@@ -74,6 +75,6 @@ def get_recommendations(title: str, keywords: list) -> list:
 
     # sort by similarity descending, filter out weak matches, return top 10
     results = sorted(candidates, key=lambda x: x["similarity"], reverse=True)
-    results = [r for r in results if r["similarity"] >= 30]
+    results = [r for r in results if r["similarity"] >= 0]
 
     return results[:10]
