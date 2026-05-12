@@ -66,6 +66,7 @@ def _try_semantic_scholar(query_terms: list) -> list | None:
         for i, c in enumerate(candidates):
             c["similarity"] = round(float(scores[i]) * 100)
 
+        candidates = [c for c in candidates if c["similarity"] >= 30]
         candidates.sort(key=lambda x: x["similarity"], reverse=True)
         return candidates[:10]
 
@@ -138,6 +139,7 @@ def _try_core(query_terms: list) -> list | None:
         for i, c in enumerate(candidates):
             c["similarity"] = round(float(scores[i]) * 100)
 
+        candidates = [c for c in candidates if c["similarity"] >= 30]
         candidates.sort(key=lambda x: x["similarity"], reverse=True)
         return candidates[:10]
 
