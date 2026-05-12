@@ -45,13 +45,16 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     # Extract title, full text, and summary input from the PDF
     extracted = extract_from_pdf(file_bytes)
 
+    abstract = extracted["abstract"] or extracted["intro"] or extracted["summary_input"]
+    classify_input = clean_text((extracted["title"] or "") + "\n\n" + abstract)
+
     # Clean the full text for classifier and keyword extractor
-    cleaned_text = clean_text(extracted["full_text"])
+    cleaned_full_text = clean_text(extracted["full_text"])
 
     # Run classification, summarization, and keyword extraction in parallel
-    classification = classify(cleaned_text)
+    classification = classify(classify_input)
     summary = summarize(extracted["summary_input"])
-    keywords = extract_keywords(cleaned_text)
+    keywords = extract_keywords(cleaned_full_text)
 
     return {
         "title": extracted["title"],
