@@ -1,7 +1,7 @@
 # AI-Based Research Paper Classifier and Summarizer
 # Research Pilot
 
-A senior capstone project that automatically classifies, summarizes, extracts keywords from, and recommends similar papers for any uploaded research paper PDF
+A senior project that automatically classifies, summarizes, extracts keywords from, and recommends similar papers for any uploaded research paper PDF
 
 ---
 
@@ -13,46 +13,6 @@ Install these before setting up the project:
 - [Node.js LTS](https://nodejs.org/) — all defaults
 - [Git](https://git-scm.com/download/win) — all defaults
 - [PostgreSQL 16](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
----
-
-## Setup
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/YOURUSERNAME/research-system.git
-cd research-system
-```
-
-### 2. Create the database
-
-Open pgAdmin 4 → Servers → PostgreSQL 16 → enter password → right-click Databases → Create → Database → name: `researchdb` → Save
-
-### 3. Backend
-
-```bash
-cd backend
-py -3.10 -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-Create a `.env` file inside `backend/` (get values from team lead):
-
-```
-DATABASE_URL=postgresql://postgres:pass@localhost:5432/researchdb
-SECRET_KEY=same_secret_key_as_team_lead
-```
-
-### 4. Frontend
-
-```bash
-cd frontend
-npm install
-```
-
-This installs all dependencies including React, Tailwind CSS, PostCSS, autoprefixer, React Router, and Axios.
-
 ---
 
 ## Running the Project
