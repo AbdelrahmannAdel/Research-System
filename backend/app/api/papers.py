@@ -46,7 +46,7 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     extracted = extract_from_pdf(file_bytes)
 
     abstract = extracted["abstract"] or extracted["intro"] or extracted["summary_input"]
-    classify_input = (extracted["title"] or "") + "\n\n" + abstract
+    classify_input = clean_text((extracted["title"] or "") + "\n\n" + abstract)
     cleaned_full_text = clean_text(extracted["full_text"])
 
     print(f"[CLASSIFY] Input length: {len(classify_input)} chars")
