@@ -92,22 +92,20 @@ for main_id, main_name in ID2MAIN.items():
 
 # Model loading (to be called from main.py lifespan event)
 def load_models(device=None):
-    
-    # Load tokenizer and both SciBERT models.
-    # Returns (l1_model, l2_model, tokenizer, device)
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    print(f"Loading tokenizer from {L1_MODEL_PATH}...")
-    tokenizer = AutoTokenizer.from_pretrained(str(L1_MODEL_PATH))
+    print(f"[CLASSIFIER] L1 path: {L1_MODEL_PATH.resolve()}")
+    print(f"[CLASSIFIER] L2 path: {L2_MODEL_PATH.resolve()}")
+    print(f"[CLASSIFIER] L1 path exists: {L1_MODEL_PATH.exists()}")
+
+    tokenizer = AutoTokenizer.from_pretrained(str(L1_MODEL_PATH), local_files_only=True)
     
-    print(f"Loading L1 model from {L1_MODEL_PATH}...")
-    l1_model = AutoModelForSequenceClassification.from_pretrained(str(L1_MODEL_PATH))
+    l1_model = AutoModelForSequenceClassification.from_pretrained(str(L1_MODEL_PATH), local_files_only=True)
     l1_model.to(device)
     l1_model.eval()
     
-    print(f"Loading L2 model from {L2_MODEL_PATH}...")
-    l2_model = AutoModelForSequenceClassification.from_pretrained(str(L2_MODEL_PATH))
+    l2_model = AutoModelForSequenceClassification.from_pretrained(str(L2_MODEL_PATH), local_files_only=True)
     l2_model.to(device)
     l2_model.eval()
     
@@ -144,12 +142,21 @@ def classify_text(text, l1_model, l2_model, tokenizer, device, threshold=0.6):
             l2_confidence: float (score of winning subcategory)
             low_confidence: bool
     """
+    
+    print(f"[CLASSIFIER] Token count: {len(tokenizer.encode(text))}")
+    print(f"[CLASSIFIER] model id in classify_text: {id(_l1_model)}")
+    print(f"[CLASSIFIER] Full text:\n{text}\n---")
     # Step 1: L1 inference
     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
+    print(f"[CLASSIFIER] input_ids: {inputs['input_ids'][0][:20]}")
+    print(f"[CLASSIFIER] decoded: {tokenizer.decode(inputs['input_ids'][0][:20])}")
     inputs = {k: v.to(device) for k, v in inputs.items()}
     
     with torch.no_grad():
         logits = l1_model(**inputs).logits.cpu().numpy()[0]
+        
+    print(f"[CLASSIFIER] L1 raw logits: {logits}")
+    print(f"[CLASSIFIER] L1 probs: {softmax(logits)}")
     
     probs_l1 = softmax(logits)
     top2_indices, top2_probs = get_top_k(probs_l1, k=2)
@@ -166,19 +173,24 @@ def classify_text(text, l1_model, l2_model, tokenizer, device, threshold=0.6):
         with torch.no_grad():
             logits_l2 = l2_model(**inputs_l2).logits.cpu().numpy()[0]  # shape (42,)
         
-        # Mask: set logits of disallowed subcategories to -inf
+        # Extract only the 6 allowed subcategory logits
         allowed_ids = ALLOWED_SUB_IDS[main_idx]
         if not allowed_ids:
             raise ValueError(f"No allowed subcategories found for main category: {main_name}")
-        masked_logits = np.full_like(logits_l2, -np.inf)
-        for sub_id in allowed_ids:
-            masked_logits[sub_id] = logits_l2[sub_id]
 
-        # Softmax over allowed 6 (exp(-inf) = 0 so disallowed subs contribute nothing)
-        probs_l2 = softmax(masked_logits)
-        best_sub_id = np.argmax(probs_l2)
-        best_sub_prob = probs_l2[best_sub_id]
+        allowed_ids_list = sorted(allowed_ids)                                    # list of 6 ints, deterministic order
+        allowed_logits = np.array([logits_l2[i] for i in allowed_ids_list])      # shape (6,)
+
+        # Softmax over these 6 only
+        exp = np.exp(allowed_logits - np.max(allowed_logits))
+        probs_6 = exp / np.sum(exp)
+
+        best_local_idx = int(np.argmax(probs_6))         # 0..5
+        best_sub_id = allowed_ids_list[best_local_idx]   # actual global id 0..41
+        best_sub_prob = float(probs_6[best_local_idx])
         best_sub_name = ID2SUB[best_sub_id]
+        
+        print(f"[CLASSIFIER] {main_name} → {best_sub_name} (l2={best_sub_prob:.3f})")
         
         candidates.append({
             "main_idx": main_idx,
@@ -223,9 +235,10 @@ _tokenizer = None
 _device = None
 
 def initialize_models():
-    # Call this once at startup (e.g., in main.py lifespan) to load models.
     global _l1_model, _l2_model, _tokenizer, _device
+    print(f"[CLASSIFIER] initialize_models called")
     _l1_model, _l2_model, _tokenizer, _device = load_models()
+    print(f"[CLASSIFIER] models set, l1 id: {id(_l1_model)}")
 
 def classify(text: str) -> dict:
     # Public facing classification function.
