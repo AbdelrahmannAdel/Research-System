@@ -5,9 +5,14 @@ import urllib.parse
 from sentence_transformers import SentenceTransformer, util
 from app.core.config import settings
 
-_embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-print(f"[RECOMMENDER] grad enabled after ST load: {torch.is_grad_enabled()}")
+_embedding_model = None
 _cache = {}
+
+def _get_embedding_model():
+    global _embedding_model
+    if _embedding_model is None:
+        _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    return _embedding_model
 
 def _make_cache_key(title: str, keywords: list) -> str:
     return f"{title}|||{' '.join(sorted(keywords[:3]))}"

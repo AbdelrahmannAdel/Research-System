@@ -41,6 +41,17 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     extracted = extract_from_pdf(file_bytes)
 
     abstract = extracted["abstract"] or extracted["intro"] or extracted["summary_input"]
+    if extracted["abstract"]:
+        abstract = extracted["abstract"]
+    elif extracted["intro"]:
+        abstract = extracted["intro"]
+    else:
+        # no abstract or intro found — use first 300 words of full text
+        # (avoids pulling in figure captions, DNA sequences, references)
+        words = extracted["full_text"].split()
+        abstract = " ".join(words[:300])
+    
+    title = unicodedata.normalize("NFKC", extracted["title"] or "")
 
     # normalize unicode from PDF (curly quotes, em dashes, ligatures, etc.)
     abstract = unicodedata.normalize("NFKC", abstract)
@@ -48,8 +59,18 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     abstract = re.sub(r"-\n", "", abstract)
     # collapse remaining newlines to spaces
     abstract = re.sub(r"\n", " ", abstract)
+    # replace curly quotes and other unicode punctuation with ASCII equivalents
+    abstract = abstract.replace('\u2018', "'").replace('\u2019', "'")  # curly single quotes
+    abstract = abstract.replace('\u201c', '"').replace('\u201d', '"')  # curly double quotes
+    abstract = abstract.replace('\u2013', '-').replace('\u2014', '-')  # en/em dashes
+    abstract = abstract.replace('\u00d7', 'x')                         # multiplication sign ×
+    # strip any remaining non-ASCII characters
+    abstract = abstract.encode('ascii', errors='ignore').decode('ascii')
+    title = title.encode('ascii', errors='ignore').decode('ascii')
 
-    title = unicodedata.normalize("NFKC", extracted["title"] or "")
+    # temp debugging    
+    non_ascii_check = [(i, c, ord(c)) for i, c in enumerate(abstract) if ord(c) > 127]
+    print(f"[DEBUG] Non-ASCII after stripping: {non_ascii_check}")
 
     # do NOT apply clean_text() here — model was trained on raw text
     classify_input = title + "\n\n" + abstract

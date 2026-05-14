@@ -271,8 +271,7 @@ def initialize_models():
     print(f"[CLASSIFIER] Self-test winner: {ID2MAIN[int(np.argmax(test_logits))]}")
 
 def classify(text: str) -> dict:
-    # Public facing classification function.
-    # Raises RuntimeError if models not initialized.
     if _l1_model is None:
         raise RuntimeError("Models not initialized. Call initialize_models() first.")
-    return classify_text(text, _l1_model, _l2_model, _tokenizer, _device, threshold=0.6)
+    with torch.no_grad():
+        return classify_text(text, _l1_model, _l2_model, _tokenizer, _device, threshold=0.6)
