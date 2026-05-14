@@ -1,10 +1,12 @@
 import requests
+import torch
 import time
 import urllib.parse
 from sentence_transformers import SentenceTransformer, util
 from app.core.config import settings
 
 _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+print(f"[RECOMMENDER] grad enabled after ST load: {torch.is_grad_enabled()}")
 _cache = {}
 
 def _make_cache_key(title: str, keywords: list) -> str:

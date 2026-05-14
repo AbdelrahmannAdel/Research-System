@@ -109,6 +109,8 @@ def load_models(device=None):
     l2_model.to(device)
     l2_model.eval()
     
+    print(f"[CLASSIFIER] L1 classifier: {l1_model.classifier}")
+    print(f"[CLASSIFIER] L1 classifier bias: {l1_model.classifier.bias.data}")
     print(f"Models loaded on {device}")
     return l1_model, l2_model, tokenizer, device
 
@@ -143,15 +145,35 @@ def classify_text(text, l1_model, l2_model, tokenizer, device, threshold=0.6):
             low_confidence: bool
     """
     
+    # Re-run self test inside inference
+    test_inputs = _tokenizer("machine learning neural network deep learning", return_tensors="pt")
+    test_inputs_device = {k: v.to(_device) for k, v in test_inputs.items()}
+    with torch.no_grad():
+        test_logits = _l1_model(**test_inputs_device).logits.cpu().numpy()[0]
+    print(f"[CLASSIFIER] Mid-inference self-test winner: {ID2MAIN[int(np.argmax(test_logits))]}")
+    print(f"[CLASSIFIER] Mid-inference self-test logits: {test_logits}")
+
     print(f"[CLASSIFIER] Token count: {len(tokenizer.encode(text))}")
+    
+    print(f"[CLASSIFIER] Token count: {len(tokenizer.encode(text))}")
+    print(f"[CLASSIFIER] grad enabled: {torch.is_grad_enabled()}")
+    print(f"[CLASSIFIER] training mode: {_l1_model.training}")
     print(f"[CLASSIFIER] model id in classify_text: {id(_l1_model)}")
     print(f"[CLASSIFIER] Full text:\n{text}\n---")
+    
     # Step 1: L1 inference
     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
-    print(f"[CLASSIFIER] input_ids: {inputs['input_ids'][0][:20]}")
+    print(f"[CLASSIFIER] input_ids first 20: {inputs['input_ids'][0][:20]}")
+    print(f"[CLASSIFIER] input_ids last 20: {inputs['input_ids'][0][-20:]}")
+    print(f"[CLASSIFIER] total tokens: {inputs['input_ids'].shape[1]}")
     print(f"[CLASSIFIER] decoded: {tokenizer.decode(inputs['input_ids'][0][:20])}")
     inputs = {k: v.to(device) for k, v in inputs.items()}
     
+    print(f"[CLASSIFIER] input_ids going into model: {inputs['input_ids'][0][:20]}")
+    print(f"[CLASSIFIER] attention_mask: {inputs['attention_mask'][0][:20]}")
+    print(f"[CLASSIFIER] inputs keys: {list(inputs.keys())}")
+    if 'token_type_ids' in inputs:
+        print(f"[CLASSIFIER] token_type_ids: {inputs['token_type_ids'][0][:20]}")
     with torch.no_grad():
         logits = l1_model(**inputs).logits.cpu().numpy()[0]
         
@@ -239,6 +261,14 @@ def initialize_models():
     print(f"[CLASSIFIER] initialize_models called")
     _l1_model, _l2_model, _tokenizer, _device = load_models()
     print(f"[CLASSIFIER] models set, l1 id: {id(_l1_model)}")
+    
+    # Self-test: run inference immediately after loading
+    test_inputs = _tokenizer("machine learning neural network deep learning", return_tensors="pt")
+    test_inputs = {k: v.to(_device) for k, v in test_inputs.items()}
+    with torch.no_grad():
+        test_logits = _l1_model(**test_inputs).logits.cpu().numpy()[0]
+    print(f"[CLASSIFIER] Self-test logits: {test_logits}")
+    print(f"[CLASSIFIER] Self-test winner: {ID2MAIN[int(np.argmax(test_logits))]}")
 
 def classify(text: str) -> dict:
     # Public facing classification function.
