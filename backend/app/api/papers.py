@@ -2,7 +2,8 @@
 # All routes here are prefixed with /papers (set in main.py)
 # Upload and recommend use real AI services.
 # Save and profile interact with the real database
-
+import re
+import unicodedata
 import json
 from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
@@ -21,13 +22,10 @@ from app.services.recommender import get_recommendations
 
 router = APIRouter()
 
-# Request body model for /recommend
 class RecommendRequest(BaseModel):
     title: str
     keywords: List[str]
 
-# Request body model for /save
-# recommendations is a list of dicts, each dict is one recommendation object
 class SaveRequest(BaseModel):
     title: str
     main_category: str
@@ -39,14 +37,24 @@ class SaveRequest(BaseModel):
 
 @router.post("/upload")
 async def upload_paper(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
-    # Read raw bytes from the uploaded PDF
     file_bytes = await file.read()
-
-    # Extract title, full text, and summary input from the PDF
     extracted = extract_from_pdf(file_bytes)
 
     abstract = extracted["abstract"] or extracted["intro"] or extracted["summary_input"]
-    classify_input = clean_text((extracted["title"] or "") + "\n\n" + abstract)
+
+    # normalize unicode from PDF (curly quotes, em dashes, ligatures, etc.)
+    abstract = unicodedata.normalize("NFKC", abstract)
+    # rejoin hyphenated line breaks (fo-\ncused → focused)
+    abstract = re.sub(r"-\n", "", abstract)
+    # collapse remaining newlines to spaces
+    abstract = re.sub(r"\n", " ", abstract)
+
+    title = unicodedata.normalize("NFKC", extracted["title"] or "")
+
+    # do NOT apply clean_text() here — model was trained on raw text
+    classify_input = title + "\n\n" + abstract
+
+    # clean_text() only for keyword extraction
     cleaned_full_text = clean_text(extracted["full_text"])
 
     print(f"[CLASSIFY] Input length: {len(classify_input)} chars")
@@ -54,7 +62,6 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     print(f"[CLASSIFY] Preview: {classify_input[:300]}")
     print(f"[CLASSIFY] Abstract content: {repr(extracted['abstract'][:200])}")
 
-    # Run classification, summarization, and keyword extraction in parallel
     classification = classify(classify_input)
     print(f"[RESULT] {classification}")
     summary = summarize(extracted["summary_input"])
@@ -74,20 +81,15 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
 
 @router.post("/recommend")
 def recommend_papers(request: RecommendRequest, current_user: User = Depends(get_current_user)):
-    # Call the recommender service with title and keywords
     results = get_recommendations(request.title, request.keywords)
     return results
 
 
 @router.post("/save")
 def save_paper(request: SaveRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Convert keywords list to comma-separated string for VARCHAR storage
     keywords_str = ", ".join(request.keywords)
-
-    # Convert recommendations list of dicts to JSON string for TEXT storage
     recommendations_str = json.dumps(request.recommendations)
 
-    # Create a new SavedPaper row linked to the logged-in user
     new_paper = SavedPaper(
         user_id=current_user.id,
         title=request.title,
@@ -107,11 +109,8 @@ def save_paper(request: SaveRequest, db: Session = Depends(get_db), current_user
 
 @router.get("/profile")
 def get_profile(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Fetch all saved papers belonging to the logged-in user
     papers = db.query(SavedPaper).filter(SavedPaper.user_id == current_user.id).all()
 
-    # Convert each SQLAlchemy object to a dict the frontend can use
-    # Also reverse the storage transformations: split keywords, parse recommendations JSON
     result = []
     for paper in papers:
         result.append({
