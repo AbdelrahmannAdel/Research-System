@@ -83,6 +83,8 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     print(f"[CLASSIFY] Preview: {classify_input[:300]}")
     print(f"[CLASSIFY] Abstract content: {repr(extracted['abstract'][:200])}")
 
+    # Run the three AI services sequentially on the extracted content
+    # use different inputs: classify uses title+abstract, summarize uses summary_input
     classification = classify(classify_input)
     print(f"[RESULT] {classification}")
     summary = summarize(extracted["summary_input"])
@@ -102,12 +104,16 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
 
 @router.post("/recommend")
 def recommend_papers(request: RecommendRequest, current_user: User = Depends(get_current_user)):
+    # Fetch and re-rank similar papers using Semantic Scholar (primary) or CORE (fallback)
+    # Results are ranked by cosine similarity using Sentence-BERT embeddings
     results = get_recommendations(request.title, request.keywords)
     return results
 
 
 @router.post("/save")
 def save_paper(request: SaveRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # keywords stored as comma-separated string
+    # recommendations stored as a JSON string to avoid needing a separate table
     keywords_str = ", ".join(request.keywords)
     recommendations_str = json.dumps(request.recommendations)
 
@@ -130,6 +136,7 @@ def save_paper(request: SaveRequest, db: Session = Depends(get_db), current_user
 
 @router.get("/profile")
 def get_profile(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Fetch all papers saved by the currently authenticated user
     papers = db.query(SavedPaper).filter(SavedPaper.user_id == current_user.id).all()
 
     result = []
@@ -140,7 +147,9 @@ def get_profile(db: Session = Depends(get_db), current_user: User = Depends(get_
             "main_category": paper.main_category,
             "subcategory": paper.subcategory,
             "summary": paper.summary,
+            # reverse the storage format: split keywords string back to list
             "keywords": paper.keywords.split(", "),
+            # reverse the storage format: parse JSON string back to list of dicts
             "recommendations": json.loads(paper.recommendations),
             "saved_at": paper.saved_at.strftime("%Y-%m-%d") if paper.saved_at else None
         })

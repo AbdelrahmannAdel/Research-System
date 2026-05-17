@@ -2,7 +2,9 @@ import re
 import fitz  # PyMuPDF
 
 def extract_from_pdf(file_bytes: bytes) -> dict:
+    # Open PDF from raw bytes (not a file path) using PyMuPDF
     doc = fitz.open(stream=file_bytes, filetype="pdf")
+    # Extract text from every page and join into one string
     pages_text = [page.get_text() for page in doc]
     full_text = "\n".join(pages_text)
 
@@ -20,6 +22,10 @@ def extract_from_pdf(file_bytes: bytes) -> dict:
         end_keywords=["2.", "2 ", "related work", "background", "methodology", "preliminaries"]
     )
 
+    # Select the best input for Gemini summarization:
+    # prefer abstract alone if it's long enough (>=150 words),
+    # otherwise combine abstract + intro for more context,
+    # fall back to intro only, then first 2000 words of full text as last resort
     if abstract and len(abstract.split()) >= 150:
         summary_input = abstract
     elif abstract and intro:
@@ -43,23 +49,25 @@ def extract_from_pdf(file_bytes: bytes) -> dict:
     }
 
 def _extract_title(doc, pages_text: list) -> str:
+    # First try PDF metadata, most reliable source if present
     title = doc.metadata.get("title", "").strip()
     if title and len(title) > 5:
         return title
 
+    # Metadata missing or too short, scan the first 15 non-empty lines of page 1
     first_page_lines = []
     for line in pages_text[0].splitlines():
         if line.strip():
             first_page_lines.append(line.strip())
 
     for line in first_page_lines[:15]:
-        if len(line) < 10:
+        if len(line) < 10:       # skip very short lines (e.g. labels, codes)
             continue
-        if line.isupper():
+        if line.isupper():       # skip all-caps lines (e.g. conference name, journal)
             continue
-        if re.match(r"^\d{4}$", line):
+        if re.match(r"^\d{4}$", line):  # skip standalone year numbers
             continue
-        return line
+        return line              # first line that passes all filters is the title
 
     return first_page_lines[0] if first_page_lines else "Unknown Title"
 

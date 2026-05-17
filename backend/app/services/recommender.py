@@ -8,19 +8,21 @@ _embedding_model = None
 _cache = {}
 
 def _get_embedding_model():
+    # Lazy-load the embedding model once and reuse it across all requests
     global _embedding_model
     if _embedding_model is None:
         _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
     return _embedding_model
 
 def _make_cache_key(title: str, keywords: list) -> str:
+    # Cache key is title + top 3 keywords (sorted for consistency regardless of order)
+    # Prevents duplicate API calls if the same paper is re-fetched in the same session
     return f"{title}|||{' '.join(sorted(keywords[:3]))}"
 
 def _try_semantic_scholar(query_terms: list) -> list | None:
-    """
-    Fetch recommendations from Semantic Scholar.
-    Retries up to 3 times with exponential backoff on 429 rate-limit responses.
-    """
+    
+    # Fetch recommendations from Semantic Scholar.
+    # Retries up to 3 times with exponential backoff on 429 rate-limit responses.
     print("[RECOMMENDER] Trying Semantic Scholar ...")
     query = " ".join(query_terms)
     url = "https://api.semanticscholar.org/graph/v1/paper/search"
@@ -29,6 +31,7 @@ def _try_semantic_scholar(query_terms: list) -> list | None:
         "limit": 20,
         "fields": "title,abstract,authors,externalIds,year",
     }
+    
     headers = {"User-Agent": "ResearchPaperSystem/1.0"}
     if settings.SEMANTIC_SCHOLAR_API_KEY:
         headers["x-api-key"] = settings.SEMANTIC_SCHOLAR_API_KEY
@@ -52,8 +55,11 @@ def _try_semantic_scholar(query_terms: list) -> list | None:
 
             candidates = []
             for p in papers:
+                # Skip papers with no abstract or title, they can't be ranked or displayed
                 if not p.get("abstract") or not p.get("title"):
                     continue
+                
+                # Prefer arXiv link if available, otherwise use Semantic Scholar paper page
                 ext_ids = p.get("externalIds", {})
                 link = (
                     f"https://arxiv.org/abs/{ext_ids['ArXiv']}"
@@ -84,16 +90,8 @@ def _try_semantic_scholar(query_terms: list) -> list | None:
 
 
 def _try_core(query_terms: list) -> list | None:
-    """
-    Fetch recommendations from CORE API v3 (fallback).
-
-    Notes:
-    - Do NOT urllib.parse.quote() the query — requests encodes params
-      automatically. Pre-encoding causes double-encoding (%20 -> %2520)
-      which makes the query unreadable and returns 0 results.
-    - No similarity filter applied — we are already in fallback mode,
-      so any real paper is better than mock data.
-    """
+    
+    # Fetch recommendations from CORE API v3 (fallback).
     print("[RECOMMENDER] Falling back to CORE API ...")
     query = " ".join(query_terms)
 
@@ -121,6 +119,8 @@ def _try_core(query_terms: list) -> list | None:
         for p in papers:
             title = p.get("title")
             abstract = p.get("abstract")
+            
+            # Skip papers missing title or abstract, unusable for ranking or display
             if not title or not abstract:
                 continue
 
@@ -155,13 +155,10 @@ def _try_core(query_terms: list) -> list | None:
 
 
 def _rank_candidates(candidates: list, query_terms: list, min_similarity: float = 30.0) -> list:
-    """
-    Embed query + abstracts, compute cosine similarity, optionally filter,
-    sort descending, return top 10.
+    # Embed query + abstracts, compute cosine similarity, optionally filter, sort descending, return top 10.
 
-    Pass min_similarity=0.0 to skip filtering (used for CORE fallback so that
-    any real paper is returned rather than falling through to mock data).
-    """
+    # Pass min_similarity=0.0 to skip filtering (used for CORE fallback so that
+    # any real paper is returned rather than falling through to mock data).
     model = _get_embedding_model()
     query_str = " ".join(query_terms)
 
@@ -180,11 +177,14 @@ def _rank_candidates(candidates: list, query_terms: list, min_similarity: float 
     return candidates[:10]
 
 def get_recommendations(title: str, keywords: list) -> list:
+    
+    # Check cache first to avoid redundant API calls for the same paper in one session
     cache_key = _make_cache_key(title, keywords)
     if cache_key in _cache:
         print("[RECOMMENDER] Cache HIT")
         return _cache[cache_key]
 
+    # Query is title + top 3 keywords for best search relevance
     query_terms = [title] + keywords[:3]
 
     # Lazy-load embedding model once
