@@ -467,7 +467,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
                 className="iv-mono text-[11.5px]"
                 style={{ color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
               >
-                Semantic Scholar · re-ranked by Sentence-BERT cosine
+                {recommendations[0]?.source || 'Semantic Scholar'} · re-ranked by Sentence-BERT cosine smiliarity
               </span>
             </div>
 
