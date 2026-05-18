@@ -360,7 +360,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
                     className="iv-mono font-medium"
                     style={{ fontSize: '13px', color: 'var(--accent)' }}
                   >
-                    {result.l1_confidence.toFixed(3)}
+                    {result.l1_confidence.toFixed(5)}
                   </span>
                 </div>
               </div>
