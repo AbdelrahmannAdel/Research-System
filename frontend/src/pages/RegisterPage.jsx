@@ -202,7 +202,7 @@ function RegisterPage({ darkMode, setDarkMode }) {
             className="iv-mono text-[11px]"
             style={{ color: 'var(--text-mute)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
           >
-            Senior capstone
+            Senior Project
           </span>
         </footer>
       </main>
