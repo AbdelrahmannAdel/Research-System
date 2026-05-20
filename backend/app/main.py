@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
     print("Shutting down...")
 
 # Create the main FastAPI application instance with lifespan
-app = FastAPI(title="Research Paper AI System", lifespan=lifespan)
+app = FastAPI(title="Research Pilot", lifespan=lifespan)
 
 # Configure CORS
 # Our frontend runs on localhost:5173 and backend on localhost:8000, different origins.

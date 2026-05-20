@@ -1,6 +1,5 @@
 import requests
 import time
-import json
 from sentence_transformers import SentenceTransformer, util
 from app.core.config import settings
 

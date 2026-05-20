@@ -1,8 +1,6 @@
-// ============================================================
 // LoginPage.jsx
 // Restyled in the Ivory palette to match HomePage.jsx.
 // Same props, same axios endpoints, same handlers.
-// ============================================================
 
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'

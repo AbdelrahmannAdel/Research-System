@@ -34,7 +34,7 @@ function App() {
   // Shared props passed to every protected page
   const pageProps = { userName, darkMode, setDarkMode, onLogout: handleLogout, token }
 
-  // Single Page Application - no route upon URL change => React swaps component instantly
+  // Single Page Application, no route upon URL change => React swaps component instantly
   return (
     <div className={darkMode ? 'dark' : ''}>
       <BrowserRouter>

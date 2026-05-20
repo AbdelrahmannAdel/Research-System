@@ -95,6 +95,7 @@ def load_models(device=None):
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
+    # debugging prints
     print(f"[CLASSIFIER] L1 path: {L1_MODEL_PATH.resolve()}")
     print(f"[CLASSIFIER] L2 path: {L2_MODEL_PATH.resolve()}")
     print(f"[CLASSIFIER] L1 path exists: {L1_MODEL_PATH.exists()}")
@@ -109,9 +110,11 @@ def load_models(device=None):
     l2_model.to(device)
     l2_model.eval()
     
+    # debugging prints
     print(f"[CLASSIFIER] L1 classifier: {l1_model.classifier}")
     print(f"[CLASSIFIER] L1 classifier bias: {l1_model.classifier.bias.data}")
     print(f"Models loaded on {device}")
+
     return l1_model, l2_model, tokenizer, device
 
 # Inference functions
@@ -126,6 +129,7 @@ def get_top_k(probs, k=2):
     return indices, probs[indices]
 
 def classify_text(text, l1_model, l2_model, tokenizer, device, threshold=0.6):
+    
     """
     Main classification pipeline.
     
@@ -150,11 +154,11 @@ def classify_text(text, l1_model, l2_model, tokenizer, device, threshold=0.6):
     test_inputs_device = {k: v.to(_device) for k, v in test_inputs.items()}
     with torch.no_grad():
         test_logits = _l1_model(**test_inputs_device).logits.cpu().numpy()[0]
+        
+    # debugging prints
     print(f"[CLASSIFIER] Mid-inference self-test winner: {ID2MAIN[int(np.argmax(test_logits))]}")
     print(f"[CLASSIFIER] Mid-inference self-test logits: {test_logits}")
-
     print(f"[CLASSIFIER] Token count: {len(tokenizer.encode(text))}")
-    
     print(f"[CLASSIFIER] Token count: {len(tokenizer.encode(text))}")
     print(f"[CLASSIFIER] grad enabled: {torch.is_grad_enabled()}")
     print(f"[CLASSIFIER] training mode: {_l1_model.training}")
@@ -163,20 +167,26 @@ def classify_text(text, l1_model, l2_model, tokenizer, device, threshold=0.6):
     
     # Step 1: L1 inference
     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
+    
+    # debugging prints
     print(f"[CLASSIFIER] input_ids first 20: {inputs['input_ids'][0][:20]}")
     print(f"[CLASSIFIER] input_ids last 20: {inputs['input_ids'][0][-20:]}")
     print(f"[CLASSIFIER] total tokens: {inputs['input_ids'].shape[1]}")
     print(f"[CLASSIFIER] decoded: {tokenizer.decode(inputs['input_ids'][0][:20])}")
+    
     inputs = {k: v.to(device) for k, v in inputs.items()}
     
+    # debugging prints
     print(f"[CLASSIFIER] input_ids going into model: {inputs['input_ids'][0][:20]}")
     print(f"[CLASSIFIER] attention_mask: {inputs['attention_mask'][0][:20]}")
     print(f"[CLASSIFIER] inputs keys: {list(inputs.keys())}")
+    
     if 'token_type_ids' in inputs:
         print(f"[CLASSIFIER] token_type_ids: {inputs['token_type_ids'][0][:20]}")
     with torch.no_grad():
         logits = l1_model(**inputs).logits.cpu().numpy()[0]
         
+    # debugging prints
     print(f"[CLASSIFIER] L1 raw logits: {logits}")
     print(f"[CLASSIFIER] L1 probs: {softmax(logits)}")
     
@@ -201,7 +211,7 @@ def classify_text(text, l1_model, l2_model, tokenizer, device, threshold=0.6):
             raise ValueError(f"No allowed subcategories found for main category: {main_name}")
 
         allowed_ids_list = sorted(allowed_ids)                                    # list of 6 ints, deterministic order
-        allowed_logits = np.array([logits_l2[i] for i in allowed_ids_list])      # shape (6,)
+        allowed_logits = np.array([logits_l2[i] for i in allowed_ids_list])       # shape (6,)
 
         # Softmax over these 6 only
         exp = np.exp(allowed_logits - np.max(allowed_logits))
@@ -267,6 +277,8 @@ def initialize_models():
     test_inputs = {k: v.to(_device) for k, v in test_inputs.items()}
     with torch.no_grad():
         test_logits = _l1_model(**test_inputs).logits.cpu().numpy()[0]
+        
+    # debugging prints
     print(f"[CLASSIFIER] Self-test logits: {test_logits}")
     print(f"[CLASSIFIER] Self-test winner: {ID2MAIN[int(np.argmax(test_logits))]}")
 

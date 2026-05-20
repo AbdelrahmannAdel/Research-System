@@ -1,11 +1,9 @@
-// ============================================================
 // Navbar.jsx
 // Translucent sticky top bar in the Ivory theme.
 // - Accent dot logo + monospace wordmark
 // - Active route gets an accent underline + glow
 // - Compact icon-only theme toggle (sun / moon glyphs)
 // - Logout sits to the right as a quiet ghost button
-// ============================================================
 
 import { Link, useLocation } from 'react-router-dom'
 
@@ -70,7 +68,7 @@ function Navbar({ userName, darkMode, setDarkMode, onLogout }) {
             </span>
           )}
 
-          {/* Theme toggle — icon only */}
+          {/* Theme toggle, icon only */}
           <button
             onClick={() => setDarkMode(!darkMode)}
             title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -80,7 +78,7 @@ function Navbar({ userName, darkMode, setDarkMode, onLogout }) {
             {darkMode ? '☀' : '☾'}
           </button>
 
-          {/* Logout — quiet ghost button */}
+          {/* Logout, quiet ghost button */}
           <button
             onClick={onLogout}
             className="iv-nav-link"

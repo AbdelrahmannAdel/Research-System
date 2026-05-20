@@ -61,13 +61,13 @@ def _extract_title(doc, pages_text: list) -> str:
             first_page_lines.append(line.strip())
 
     for line in first_page_lines[:15]:
-        if len(line) < 10:       # skip very short lines (e.g. labels, codes)
+        if len(line) < 10:              # skip very short lines (e.g. labels, codes)
             continue
-        if line.isupper():       # skip all-caps lines (e.g. conference name, journal)
+        if line.isupper():              # skip all-caps lines (e.g. conference name, journal)
             continue
         if re.match(r"^\d{4}$", line):  # skip standalone year numbers
             continue
-        return line              # first line that passes all filters is the title
+        return line                     # first line that passes all filters is the title
 
     return first_page_lines[0] if first_page_lines else "Unknown Title"
 

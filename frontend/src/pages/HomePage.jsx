@@ -1,4 +1,3 @@
-// ============================================================
 // HomePage.jsx
 // Drop-in replacement for the original HomePage.jsx.
 // Same props, same state, same handlers, same axios endpoints.
@@ -13,15 +12,14 @@
 //   4. Navbar component receives the same props it always did.
 //
 // The component will render an empty state, an analysis state, and a
-// recommendations state — all driven by real fetched data.
-// ============================================================
+// recommendations state all driven by real fetched data.
 
 import { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import Navbar from '../components/Navbar.jsx'
 
 function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
-  // Original 7 state slots — preserved exactly
+  // Original 7 state slots, preserved exactly
   const [selectedFile, setSelectedFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)

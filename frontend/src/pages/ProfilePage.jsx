@@ -1,8 +1,6 @@
-// ============================================================
 // ProfilePage.jsx
 // Restyled in the Ivory palette to match HomePage.jsx.
 // Same props, same axios endpoint, same expand/collapse behavior.
-// ============================================================
 
 import { useState, useEffect } from 'react'
 import axios from 'axios'
@@ -45,7 +43,7 @@ function ProfilePage({ userName, darkMode, setDarkMode, onLogout, token }) {
 
       <main className="max-w-5xl mx-auto px-6 pt-12 pb-24 relative z-10">
 
-        {/* ============ Page header ============ */}
+        {/* Page header */}
         <header className="mb-10">
           <span className="iv-eyebrow"><span className="dot" /> 02 — Library</span>
           <h1
@@ -63,7 +61,7 @@ function ProfilePage({ userName, darkMode, setDarkMode, onLogout, token }) {
           </p>
         </header>
 
-        {/* ============ Counter strip ============ */}
+        {/* Counter strip */}
         {!loading && savedPapers.length > 0 && (
           <div
             className="flex items-center justify-between pb-3 mb-5"
@@ -84,7 +82,7 @@ function ProfilePage({ userName, darkMode, setDarkMode, onLogout, token }) {
           </div>
         )}
 
-        {/* ============ States ============ */}
+        {/* States */}
         {loading ? (
           <LoadingState />
         ) : savedPapers.length === 0 ? (
@@ -126,7 +124,7 @@ function ProfilePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   )
 }
 
-/* ============ Sub-components ============ */
+/* Sub-components */
 
 function LoadingState() {
   return (
@@ -189,7 +187,7 @@ function PaperCard({ paper, index, expanded, onToggle }) {
       className="iv-panel transition-shadow"
       style={{ overflow: 'hidden' }}
     >
-      {/* Header (always visible — click to expand) */}
+      {/* Header (always visible, click to expand) */}
       <button
         onClick={onToggle}
         className="w-full text-left p-5 grid items-start gap-4"
@@ -256,7 +254,7 @@ function PaperCard({ paper, index, expanded, onToggle }) {
           style={{ borderTop: '1px dashed var(--line)' }}
         >
           <div className="pt-5 grid gap-3.5 md:grid-cols-2">
-            {/* Summary - full width */}
+            {/* Summary, full width */}
             <div className="iv-panel-2 p-5 md:col-span-2">
               <h4
                 className="iv-mono mb-3 flex items-center gap-2 font-medium"
@@ -272,7 +270,7 @@ function PaperCard({ paper, index, expanded, onToggle }) {
               </p>
             </div>
 
-            {/* Keywords - full width */}
+            {/* Keywords, full width */}
             {paper.keywords && paper.keywords.length > 0 && (
               <div className="iv-panel-2 p-5 md:col-span-2">
                 <h4

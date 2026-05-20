@@ -14,7 +14,7 @@
    COLOR DECISIONS:
    - Light mode: warm cream surfaces, deep navy primary, purple secondary.
    - Dark mode: warm dark brown-black, lightened navy + lavender accents.
-   - All transitions are scoped to surfaces — pointer states stay fast.
+   - All transitions are scoped to surfaces, pointer states stay fast.
    ============================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
@@ -128,7 +128,7 @@ body {
   }
 }
 
-/* ============ Reusable Ivory utility classes ============ */
+/* Reusable Ivory utility classes */
 
 .iv-mono  { font-family: 'Geist Mono', ui-monospace, monospace; }
 .iv-serif { font-family: 'Instrument Serif', 'Times New Roman', serif; font-style: italic; }
@@ -249,7 +249,7 @@ body {
   transition: width 0.5s cubic-bezier(.4,.7,.2,1);
 }
 
-/* Page background atmospherics (optional - apply to body wrapper) */
+/* Page background atmospherics (optional, apply to body wrapper) */
 .iv-bg-fx {
   position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
   background:

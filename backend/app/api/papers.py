@@ -72,12 +72,13 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     non_ascii_check = [(i, c, ord(c)) for i, c in enumerate(abstract) if ord(c) > 127]
     print(f"[DEBUG] Non-ASCII after stripping: {non_ascii_check}")
 
-    # do NOT apply clean_text() here — model was trained on raw text
+    # do NOT apply clean_text() here, model was trained on raw text
     classify_input = title + "\n\n" + abstract
 
     # clean_text() only for keyword extraction
     cleaned_full_text = clean_text(extracted["full_text"])
 
+    # debugging prints
     print(f"[CLASSIFY] Input length: {len(classify_input)} chars")
     print(f"[CLASSIFY] Abstract found: {bool(extracted['abstract'])}")
     print(f"[CLASSIFY] Preview: {classify_input[:300]}")
@@ -87,6 +88,7 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     # use different inputs: classify uses title+abstract, summarize uses summary_input
     classification = classify(classify_input)
     print(f"[RESULT] {classification}")
+    
     summary = summarize(extracted["summary_input"])
     keywords = extract_keywords(cleaned_full_text)
 
