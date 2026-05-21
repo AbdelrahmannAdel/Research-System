@@ -48,6 +48,10 @@ def extract_from_pdf(file_bytes: bytes) -> dict:
         "summary_input": summary_input,
     }
 
+# Fallback: scan first 15 non-empty lines of page 1.
+# Filters out short labels, all-caps conference/journal names,
+# and standalone year numbers — the first line that passes is the title.
+
 def _extract_title(doc, pages_text: list) -> str:
     # First try PDF metadata, most reliable source if present
     title = doc.metadata.get("title", "").strip()

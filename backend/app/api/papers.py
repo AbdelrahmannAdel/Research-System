@@ -34,13 +34,11 @@ class SaveRequest(BaseModel):
     keywords: List[str]
     recommendations: List[dict]
 
-
 @router.post("/upload")
 async def upload_paper(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
     file_bytes = await file.read()
     extracted = extract_from_pdf(file_bytes)
 
-    abstract = extracted["abstract"] or extracted["intro"] or extracted["summary_input"]
     if extracted["abstract"]:
         abstract = extracted["abstract"]
     elif extracted["intro"]:
@@ -68,26 +66,15 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     abstract = abstract.encode('ascii', errors='ignore').decode('ascii')
     title = title.encode('ascii', errors='ignore').decode('ascii')
 
-    # temp debugging    
-    non_ascii_check = [(i, c, ord(c)) for i, c in enumerate(abstract) if ord(c) > 127]
-    print(f"[DEBUG] Non-ASCII after stripping: {non_ascii_check}")
-
     # do NOT apply clean_text() here, model was trained on raw text
     classify_input = title + "\n\n" + abstract
 
     # clean_text() only for keyword extraction
     cleaned_full_text = clean_text(extracted["full_text"])
 
-    # debugging prints
-    print(f"[CLASSIFY] Input length: {len(classify_input)} chars")
-    print(f"[CLASSIFY] Abstract found: {bool(extracted['abstract'])}")
-    print(f"[CLASSIFY] Preview: {classify_input[:300]}")
-    print(f"[CLASSIFY] Abstract content: {repr(extracted['abstract'][:200])}")
-
     # Run the three AI services sequentially on the extracted content
     # use different inputs: classify uses title+abstract, summarize uses summary_input
     classification = classify(classify_input)
-    print(f"[RESULT] {classification}")
     
     summary = summarize(extracted["summary_input"])
     keywords = extract_keywords(cleaned_full_text)
@@ -103,14 +90,12 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
         "low_confidence": classification["low_confidence"]
     }
 
-
 @router.post("/recommend")
 def recommend_papers(request: RecommendRequest, current_user: User = Depends(get_current_user)):
     # Fetch and re-rank similar papers using Semantic Scholar (primary) or CORE (fallback)
     # Results are ranked by cosine similarity using Sentence-BERT embeddings
     results = get_recommendations(request.title, request.keywords)
     return results
-
 
 @router.post("/save")
 def save_paper(request: SaveRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -134,7 +119,6 @@ def save_paper(request: SaveRequest, db: Session = Depends(get_db), current_user
     db.refresh(new_paper)
 
     return {"message": "Paper saved successfully"}
-
 
 @router.get("/profile")
 def get_profile(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

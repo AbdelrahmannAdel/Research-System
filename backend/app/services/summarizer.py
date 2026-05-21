@@ -1,3 +1,7 @@
+# Summarizes research paper text using the Gemini API.
+# Takes cleaned text as input and returns a single academic paragraph
+# covering the paper's objective, methodology, and findings.
+
 from google import genai
 from fastapi import HTTPException
 from app.core.config import settings

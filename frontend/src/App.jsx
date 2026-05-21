@@ -12,7 +12,7 @@ function ProtectedRoute({ token, children }) {
 }
 
 function App() {
-  // Holding shared data in App.jsx is better than seperate pages.
+  // Holding shared data in App.jsx is better than separate pages.
   const [token, setToken] = useState(null) // default null => Logged out
   const [userName, setUserName] = useState('')
   const [darkMode, setDarkMode] = useState(true)

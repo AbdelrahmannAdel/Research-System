@@ -117,8 +117,6 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
     }
   }
 
-  const confidence = result && !result.low_confidence ? 0.972 : 0.45
-
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       <div className="iv-bg-fx" aria-hidden="true" />

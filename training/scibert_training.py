@@ -322,6 +322,9 @@ l2_trainer = Trainer(
     compute_metrics=compute_metrics,
 )
 
+# resume_from_checkpoint=False ensures L2 always trains from the base SciBERT
+# weights, not L1's checkpoint. The two models solve different tasks and
+# sharing a checkpoint would corrupt L2's starting point.
 l2_trainer.train(resume_from_checkpoint=False)
 
 l2_val_results = l2_trainer.evaluate()
