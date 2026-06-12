@@ -26,7 +26,11 @@ def _load_label_mappings():
     id2sub = {int(k): v for k, v in id2sub.items()}
     return id2main, id2sub
 
+print("Loading label mappings...")
 ID2MAIN, ID2SUB = _load_label_mappings()
+print("Label mappings loaded.")
+
+
 NUM_MAIN = len(ID2MAIN)     # 7
 NUM_SUB = len(ID2SUB)       # 42
 
