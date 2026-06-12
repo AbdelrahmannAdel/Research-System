@@ -25,7 +25,7 @@ function LoginPage({ onLogin, darkMode, setDarkMode }) {
     setLoading(true)
 
     try {
-      const response = await axios.post('${API_URL}/auth/login', { email, password })
+      const response = await axios.post(`${API_URL}/auth/login`, { email, password })
       onLogin(response.data.access_token, response.data.name)
       navigate('/home')
     } catch (err) {

@@ -62,7 +62,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
       const formData = new FormData()
       formData.append('file', selectedFile)
 
-      const response = await axios.post('${API_URL}/papers/upload', formData, {
+      const response = await axios.post(`${API_URL}/papers/upload`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -81,7 +81,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
     setLoadingRecs(true)
 
     try {
-      const response = await axios.post('${API_URL}/papers/recommend', {
+      const response = await axios.post(`${API_URL}/papers/recommend`, {
         title: result.title,
         keywords: result.keywords,
       }, {
@@ -100,7 +100,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   const handleSave = async () => {
     setSavingMsg('Saving...')
     try {
-      await axios.post('${API_URL}/papers/save', {
+      await axios.post(`${API_URL}/papers/save`, {
         title: result.title,
         main_category: result.main_category,
         subcategory: result.low_confidence ? 'Unclassified' : result.subcategory,

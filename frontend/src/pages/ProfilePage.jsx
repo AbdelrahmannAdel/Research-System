@@ -19,7 +19,7 @@ function ProfilePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   useEffect(() => {
     const fetchPapers = async () => {
       try {
-        const response = await axios.get('${API_URL}/papers/profile', {
+        const response = await axios.get(`${API_URL}/papers/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         setSavedPapers(response.data)

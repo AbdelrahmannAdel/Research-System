@@ -109,7 +109,7 @@ def load_models(device=None):
     L1_REPO = f"{HF_USERNAME}/research-system-scibert-l1"
     L2_REPO = f"{HF_USERNAME}/research-system-scibert-l2"
 
-    tokenizer = AutoTokenizer.from_pretrained(str(L1_MODEL_PATH), local_files_only=True)
+    tokenizer = AutoTokenizer.from_pretrained(L1_REPO)
     
     l1_model = AutoModelForSequenceClassification.from_pretrained(L1_REPO)
     l1_model.to(device)

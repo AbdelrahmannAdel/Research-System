@@ -25,7 +25,7 @@ function RegisterPage({ darkMode, setDarkMode }) {
     setLoading(true)
 
     try {
-      await axios.post('${API_URL}/auth/register', { name, email, password })
+      await axios.post(`${API_URL}/auth/register`, { name, email, password })
       navigate('/login')
     } catch (err) {
       setError(err.response?.data?.detail || 'Registration failed. Please try again.')
