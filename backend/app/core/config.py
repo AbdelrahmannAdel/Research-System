@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str
     CORE_API_KEY: str
     SEMANTIC_SCHOLAR_API_KEY: str = ""
+    HF_TOKEN: str
 
     class Config:
         # Tell BaseSettings to look for variables in the .env file

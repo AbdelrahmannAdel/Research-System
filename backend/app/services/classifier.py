@@ -2,6 +2,8 @@ import json
 import torch
 import numpy as np
 from pathlib import Path
+import os
+from huggingface_hub import login
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # Paths
@@ -94,14 +96,22 @@ for main_id, main_name in ID2MAIN.items():
 def load_models(device=None):
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    hf_token = os.getenv("HF_TOKEN")
+    if hf_token:
+        login(token=hf_token)    
+    
+    HF_USERNAME = "abdelrahmannAdel"
+    L1_REPO = f"{HF_USERNAME}/research-system-scibert-l1"
+    L2_REPO = f"{HF_USERNAME}/research-system-scibert-l2"
 
     tokenizer = AutoTokenizer.from_pretrained(str(L1_MODEL_PATH), local_files_only=True)
     
-    l1_model = AutoModelForSequenceClassification.from_pretrained(str(L1_MODEL_PATH), local_files_only=True)
+    l1_model = AutoModelForSequenceClassification.from_pretrained(L1_REPO)
     l1_model.to(device)
     l1_model.eval()
-    
-    l2_model = AutoModelForSequenceClassification.from_pretrained(str(L2_MODEL_PATH), local_files_only=True)
+
+    l2_model = AutoModelForSequenceClassification.from_pretrained(L2_REPO)
     l2_model.to(device)
     l2_model.eval()
     
