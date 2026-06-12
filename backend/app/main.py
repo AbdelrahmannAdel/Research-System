@@ -10,15 +10,22 @@ from app.database import Base, engine
 from app.api import auth, papers
 from app.models import paper
 from app.services.classifier import initialize_models
+import asyncio
 
 # Define lifespan context manager for startup/shutdown events
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Creating database tables...")
     Base.metadata.create_all(bind=engine)
-    print("Ready to serve.")
+    print("Tables created. Starting server...")
+    asyncio.create_task(load_models_async())
     yield
     print("Shutting down...")
+
+async def load_models_async():
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, initialize_models)
+    print("Models loaded and ready.")
 
 # Create the main FastAPI application instance with lifespan
 app = FastAPI(title="Research Pilot", lifespan=lifespan)
@@ -28,7 +35,7 @@ app = FastAPI(title="Research Pilot", lifespan=lifespan)
 # This middleware tells the backend to accept requests from the frontend's address.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://your-vercel-app.vercel.app"],  # only allow our frontend
+    allow_origins=["http://localhost:5173", "https://research-system-olive.vercel.app"],  # only allow our frontend
     allow_credentials=True,                   # allow cookies and auth headers
     allow_methods=["*"],                      # allow all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],                      # allow all headers
