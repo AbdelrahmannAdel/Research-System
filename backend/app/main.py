@@ -14,14 +14,10 @@ from app.services.classifier import initialize_models
 # Define lifespan context manager for startup/shutdown events
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: create tables and load models
     print("Creating database tables...")
     Base.metadata.create_all(bind=engine)
-    print("Loading classification models...")
-    initialize_models()
-    print("Models loaded. Ready to serve.")
+    print("Ready to serve.")
     yield
-    # Shutdown: any cleanup if needed (optional)
     print("Shutting down...")
 
 # Create the main FastAPI application instance with lifespan
@@ -32,7 +28,7 @@ app = FastAPI(title="Research Pilot", lifespan=lifespan)
 # This middleware tells the backend to accept requests from the frontend's address.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # only allow our frontend
+    allow_origins=["http://localhost:5173", "https://your-vercel-app.vercel.app"],  # only allow our frontend
     allow_credentials=True,                   # allow cookies and auth headers
     allow_methods=["*"],                      # allow all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],                      # allow all headers

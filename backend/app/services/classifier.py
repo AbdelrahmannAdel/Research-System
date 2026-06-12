@@ -234,7 +234,8 @@ def initialize_models():
     _l1_model, _l2_model, _tokenizer, _device = load_models()
 
 def classify(text: str) -> dict:
+    global _l1_model, _l2_model, _tokenizer, _device
     if _l1_model is None:
-        raise RuntimeError("Models not initialized. Call initialize_models() first.")
+        initialize_models()
     with torch.no_grad():
         return classify_text(text, _l1_model, _l2_model, _tokenizer, _device, threshold=0.6)
