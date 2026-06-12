@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
+import API_URL from '../api.js'
 
 function RegisterPage({ darkMode, setDarkMode }) {
   const [name, setName] = useState('')
@@ -24,7 +25,7 @@ function RegisterPage({ darkMode, setDarkMode }) {
     setLoading(true)
 
     try {
-      await axios.post('http://localhost:8000/auth/register', { name, email, password })
+      await axios.post('${API_URL}/auth/register', { name, email, password })
       navigate('/login')
     } catch (err) {
       setError(err.response?.data?.detail || 'Registration failed. Please try again.')

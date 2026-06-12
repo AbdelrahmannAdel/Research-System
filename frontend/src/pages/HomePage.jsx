@@ -17,6 +17,7 @@
 import { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import Navbar from '../components/Navbar.jsx'
+import API_URL from '../api.js'
 
 function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   // Original 7 state slots, preserved exactly
@@ -61,7 +62,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
       const formData = new FormData()
       formData.append('file', selectedFile)
 
-      const response = await axios.post('http://localhost:8000/papers/upload', formData, {
+      const response = await axios.post('${API_URL}/papers/upload', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -80,7 +81,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
     setLoadingRecs(true)
 
     try {
-      const response = await axios.post('http://localhost:8000/papers/recommend', {
+      const response = await axios.post('${API_URL}/papers/recommend', {
         title: result.title,
         keywords: result.keywords,
       }, {
@@ -99,7 +100,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   const handleSave = async () => {
     setSavingMsg('Saving...')
     try {
-      await axios.post('http://localhost:8000/papers/save', {
+      await axios.post('${API_URL}/papers/save', {
         title: result.title,
         main_category: result.main_category,
         subcategory: result.low_confidence ? 'Unclassified' : result.subcategory,

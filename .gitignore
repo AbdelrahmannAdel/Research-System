@@ -10,3 +10,5 @@ node_modules/
 openalex_checkpoints/
 pubmed_counts/
 training/datasets/
+.env.development
+.env.production

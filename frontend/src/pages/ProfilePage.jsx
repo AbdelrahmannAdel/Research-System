@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Navbar from '../components/Navbar.jsx'
+import API_URL from '../api.js'
 
 function ProfilePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   const [expandedId, setExpandedId] = useState(null)
@@ -18,7 +19,7 @@ function ProfilePage({ userName, darkMode, setDarkMode, onLogout, token }) {
   useEffect(() => {
     const fetchPapers = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/papers/profile', {
+        const response = await axios.get('${API_URL}/papers/profile', {
           headers: { Authorization: `Bearer ${token}` }
         })
         setSavedPapers(response.data)
