@@ -9,6 +9,4 @@ node_modules/
 *.csv
 openalex_checkpoints/
 pubmed_counts/
-backend/models/scibert_l1/
-backend/models/scibert_l2/
 training/datasets/

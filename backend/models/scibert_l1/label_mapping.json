@@ -1,0 +1,20 @@
+{
+  "id2label": {
+    "0": "Biology & Medicine",
+    "1": "Chemistry",
+    "2": "Computer Science",
+    "3": "Economics & Business",
+    "4": "Engineering",
+    "5": "Mathematics",
+    "6": "Physics"
+  },
+  "label2id": {
+    "Biology & Medicine": 0,
+    "Chemistry": 1,
+    "Computer Science": 2,
+    "Economics & Business": 3,
+    "Engineering": 4,
+    "Mathematics": 5,
+    "Physics": 6
+  }
+}
