@@ -13,8 +13,8 @@ function ProtectedRoute({ token, children }) {
 
 function App() {
   // Holding shared data in App.jsx is better than separate pages.
-  const [token, setToken] = useState(null) // default null => Logged out
-  const [userName, setUserName] = useState('')
+  const [token, setToken] = useState(() => localStorage.getItem('token') || null)
+  const [userName, setUserName] = useState(() => localStorage.getItem('userName') || '')
   const [darkMode, setDarkMode] = useState(true)
 
   useEffect(() => {
@@ -24,11 +24,15 @@ function App() {
   const handleLogin = (accessToken, name) => {
     setToken(accessToken)
     setUserName(name)
+    localStorage.setItem('token', accessToken)
+    localStorage.setItem('userName', name)
   }
 
   const handleLogout = () => {
     setToken(null)
     setUserName('')
+    localStorage.removeItem('token')
+    localStorage.removeItem('userName')
   }
 
   // Shared props passed to every protected page
