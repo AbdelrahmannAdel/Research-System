@@ -36,8 +36,13 @@ class SaveRequest(BaseModel):
 
 @router.post("/upload")
 async def upload_paper(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+    import time
+
+    t0 = time.time()
+    
     file_bytes = await file.read()
     extracted = extract_from_pdf(file_bytes)
+    print(f"[TIMING] PDF extraction: {time.time() - t0:.2f}s")
 
     if extracted["abstract"]:
         abstract = extracted["abstract"]
@@ -74,10 +79,19 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
 
     # Run the three AI services sequentially on the extracted content
     # use different inputs: classify uses title+abstract, summarize uses summary_input
+    t1 = time.time()
     classification = classify(classify_input)
-    
+    print(f"[TIMING] Classification: {time.time() - t1:.2f}s")
+
+    t2 = time.time()
     summary = summarize(extracted["summary_input"])
+    print(f"[TIMING] Summarization: {time.time() - t2:.2f}s")
+
+    t3 = time.time()
     keywords = extract_keywords(cleaned_full_text)
+    print(f"[TIMING] Keywords: {time.time() - t3:.2f}s")
+
+    print(f"[TIMING] Total: {time.time() - t0:.2f}s")
 
     return {
         "title": extracted["title"],
