@@ -4,28 +4,25 @@
 # Run with: uvicorn app.main:app --reload
 
 from contextlib import asynccontextmanager
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.api import auth, papers
 from app.models import paper
 from app.services.classifier import initialize_models
-import asyncio
 
 # Define lifespan context manager for startup/shutdown events
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Creating database tables...")
     Base.metadata.create_all(bind=engine)
-    print("Tables created. Starting server...")
-    asyncio.create_task(load_models_async())
-    yield
-    print("Shutting down...")
-
-async def load_models_async():
+    print("Tables created. Loading models...")
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, initialize_models)
     print("Models loaded and ready.")
+    yield
+    print("Shutting down...")
 
 # Create the main FastAPI application instance with lifespan
 app = FastAPI(title="Research Pilot", lifespan=lifespan)
