@@ -12,5 +12,5 @@ pubmed_counts/
 training/datasets/
 .env.development
 .env.production
-backend/models/sicbert_l1
-backend/models/sicbert_l2
+backend/models/scibert_l1
+backend/models/scibert_l2
