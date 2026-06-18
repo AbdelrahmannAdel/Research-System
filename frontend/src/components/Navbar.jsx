@@ -16,17 +16,10 @@ function Navbar({ userName, darkMode, setDarkMode, onLogout }) {
 
         {/* Brand */}
         <Link to="/home" className="flex items-center gap-2.5 group" style={{ textDecoration: 'none' }}>
-          <span
-            aria-hidden="true"
-            className="rounded-full"
-            style={{
-              width: '7px',
-              height: '7px',
-              background: 'var(--accent)',
-              boxShadow: '0 0 12px var(--accent)',
-              transition: 'box-shadow 0.3s ease',
-            }}
-          />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" style={{ borderRadius: '6px', flexShrink: 0 }}>
+            <rect width="48" height="48" rx="10" fill="#2a5db0"/>
+            <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="700" fontSize="18" fill="#ffffff" letterSpacing="-0.5">RP</text>
+          </svg>
           <span
             className="iv-mono font-medium"
             style={{

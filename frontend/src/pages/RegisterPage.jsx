@@ -41,11 +41,10 @@ function RegisterPage({ darkMode, setDarkMode }) {
       {/* Top brand strip */}
       <header className="max-w-5xl mx-auto px-6 pt-7 pb-4 flex items-center justify-between relative z-10">
         <Link to="/login" className="flex items-center gap-2.5" style={{ textDecoration: 'none' }}>
-          <span
-            aria-hidden="true"
-            className="rounded-full"
-            style={{ width: '7px', height: '7px', background: 'var(--accent)', boxShadow: '0 0 12px var(--accent)' }}
-          />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" style={{ borderRadius: '6px', flexShrink: 0 }}>
+            <rect width="48" height="48" rx="10" fill="#2a5db0"/>
+            <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="700" fontSize="18" fill="#ffffff" letterSpacing="-0.5">RP</text>
+          </svg>
           <span
             className="iv-mono font-medium"
             style={{ fontSize: '13px', color: 'var(--text)', letterSpacing: '0.16em', textTransform: 'uppercase' }}
