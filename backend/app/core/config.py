@@ -9,8 +9,6 @@ class Settings(BaseSettings):
     DATABASE_URL: str  # PostgreSQL connection string
     SECRET_KEY: str    # secret key used to sign and verify JWT tokens
     GEMINI_API_KEY: str
-    CORE_API_KEY: str
-    SEMANTIC_SCHOLAR_API_KEY: str = ""
     HF_TOKEN: str
 
     class Config:

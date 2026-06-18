@@ -1,10 +1,12 @@
 import requests
 import time
 from sentence_transformers import SentenceTransformer, util
-from app.core.config import settings
+
+# No settings import needed — OpenAlex requires no API key
 
 _embedding_model = None
 _cache = {}
+
 
 def _get_embedding_model():
     # Lazy-load the embedding model once and reuse it across all requests
@@ -13,192 +15,151 @@ def _get_embedding_model():
         _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
     return _embedding_model
 
+
 def _make_cache_key(title: str, keywords: list) -> str:
     # Cache key is title + top 3 keywords (sorted for consistency regardless of order)
     # Prevents duplicate API calls if the same paper is re-fetched in the same session
     return f"{title}|||{' '.join(sorted(keywords[:3]))}"
 
-def _try_semantic_scholar(query_terms: list) -> list | None:
-    
-    # Fetch recommendations from Semantic Scholar.
-    # Retries up to 3 times with exponential backoff on 429 rate-limit responses.
-    print("[RECOMMENDER] Trying Semantic Scholar ...")
-    query = " ".join(query_terms)
-    url = "https://api.semanticscholar.org/graph/v1/paper/search"
-    params = {
-        "query": query,
-        "limit": 20,
-        "fields": "title,abstract,authors,externalIds,year",
-    }
-    
-    headers = {"User-Agent": "ResearchPaperSystem/1.0"}
-    if settings.SEMANTIC_SCHOLAR_API_KEY:
-        headers["x-api-key"] = settings.SEMANTIC_SCHOLAR_API_KEY
 
-    max_retries = 1
-    for attempt in range(max_retries):
-        try:
-            resp = requests.get(url, headers=headers, params=params, timeout=10)
-
-            if resp.status_code == 429:
-                print(f"[RECOMMENDER] Semantic Scholar rate-limited (429). Moving to fallback ...")
-                return None
-
-            if resp.status_code != 200:
-                print(f"[RECOMMENDER] Semantic Scholar returned {resp.status_code}")
-                return None
-
-            data = resp.json()
-            papers = data.get("data", [])
-            print(f"[RECOMMENDER] Semantic Scholar returned {len(papers)} papers")
-
-            candidates = []
-            for p in papers:
-                # Skip papers with no abstract or title, they can't be ranked or displayed
-                if not p.get("abstract") or not p.get("title"):
-                    continue
-                
-                # Prefer arXiv link if available, otherwise use Semantic Scholar paper page
-                ext_ids = p.get("externalIds", {})
-                link = (
-                    f"https://arxiv.org/abs/{ext_ids['ArXiv']}"
-                    if ext_ids.get("ArXiv")
-                    else f"https://www.semanticscholar.org/paper/{p.get('paperId', '')}"
-                )
-                candidates.append({
-                    "source": "Semantic Scholar",
-                    "title": p["title"],
-                    "abstract": p["abstract"],
-                    "authors": ", ".join(a["name"] for a in p.get("authors", [])),
-                    "url": link,
-                })
-
-            if not candidates:
-                return None
-
-            results = _rank_candidates(candidates, query_terms, min_similarity=30.0)
-            return results if results else None
-
-        except Exception as exc:
-            print(f"[RECOMMENDER] Semantic Scholar error (attempt {attempt + 1}): {exc}")
-            if attempt < max_retries - 1:
-                time.sleep(2 ** attempt)
-
-    print("[RECOMMENDER] Semantic Scholar failed after all retries.")
-    return None
+def _reconstruct_abstract(inverted_index: dict) -> str:
+    # OpenAlex stores abstracts as an inverted index: { "word": [position, position, ...], ... }
+    # We reconstruct the original text by sorting all (position, word) pairs and joining them
+    if not inverted_index:
+        return ""
+    word_positions = [
+        (pos, word)
+        for word, positions in inverted_index.items()
+        for pos in positions
+    ]
+    word_positions.sort(key=lambda x: x[0])
+    return " ".join(word for _, word in word_positions)
 
 
-def _try_core(query_terms: list) -> list | None:
-    
-    # Fetch recommendations from CORE API v3 (fallback).
-    print("[RECOMMENDER] Falling back to CORE API ...")
+def _try_openalex(query_terms: list) -> list | None:
+    # Fetch recommendation candidates from OpenAlex.
+    # OpenAlex is free, requires no API key, and has 250M+ works.
+    # We pass a mailto param as a courtesy to OpenAlex to identify our app
+    # and get access to the "polite pool" (faster, more reliable responses).
+    print("[RECOMMENDER] Trying OpenAlex ...")
+
     query = " ".join(query_terms)
 
-    url = "https://api.core.ac.uk/v3/search/works"
+    url = "https://api.openalex.org/works"
     params = {
-        "q": query,
-        "limit": 20,
+        "search": query,
+        "per_page": 20,
+        # Request only the fields we need to keep the response small and fast
+        "select": "title,abstract_inverted_index,authorships,id,doi",
+        # Polite pool: identifies our app to OpenAlex for better rate limits
+        "mailto": "researchpilot@university.edu",
     }
-    headers = {
-        "Authorization": f"Bearer {settings.CORE_API_KEY}"
-    }
-    
+
     try:
-        resp = requests.get(url, headers=headers, params=params, timeout=20)
+        resp = requests.get(url, params=params, timeout=15)
+
         if resp.status_code != 200:
-            print(f"[RECOMMENDER] CORE returned {resp.status_code}: {resp.text[:200]}")
-            print(f"[RECOMMENDER] CORE rate limit remaining: {resp.headers.get('x-ratelimit-remaining', 'unknown')}")
+            print(f"[RECOMMENDER] OpenAlex returned {resp.status_code}")
             return None
 
         data = resp.json()
-        papers = data.get("results", [])
-        print(f"[RECOMMENDER] CORE returned {len(papers)} papers")
+        works = data.get("results", [])
+        print(f"[RECOMMENDER] OpenAlex returned {len(works)} works")
 
         candidates = []
-        for p in papers:
-            title = p.get("title")
-            abstract = p.get("abstract")
-            
-            # Skip papers missing title or abstract, unusable for ranking or display
+        for w in works:
+            title = w.get("title")
+
+            # Reconstruct abstract from OpenAlex inverted index format
+            abstract = _reconstruct_abstract(w.get("abstract_inverted_index"))
+
+            # Skip papers missing title or abstract — unusable for ranking or display
             if not title or not abstract:
                 continue
 
-            authors_list = p.get("authors", [])
-            author_str = (
-                ", ".join(a.get("name", "") for a in authors_list)
-                if authors_list
-                else "Unknown"
-            )
+            # Build author string from authorships list
+            authorships = w.get("authorships", [])
+            authors = ", ".join(
+                a.get("author", {}).get("display_name", "")
+                for a in authorships[:5]  # cap at 5 authors to avoid very long strings
+                if a.get("author", {}).get("display_name")
+            ) or "Unknown"
 
-            link = p.get("downloadUrl", "https://core.ac.uk")
-            if isinstance(link, list):
-                link = link[0] if link else "https://core.ac.uk"
+            # Prefer DOI link if available, otherwise fall back to OpenAlex page
+            doi = w.get("doi")
+            openalex_id = w.get("id", "")  # e.g. "https://openalex.org/W12345"
+            link = doi if doi else openalex_id
 
             candidates.append({
-                "source": "CORE",
+                "source": "OpenAlex",
                 "title": title,
                 "abstract": abstract.strip(),
-                "authors": author_str,
+                "authors": authors,
                 "url": link,
             })
 
         if not candidates:
+            print("[RECOMMENDER] OpenAlex returned no usable candidates")
             return None
 
-        # min_similarity=0.0 — rank but do not filter out any results
-        return _rank_candidates(candidates, query_terms, min_similarity=0.0)
+        # Re-rank by cosine similarity, filter to >= 30% similarity
+        results = _rank_candidates(candidates, query_terms, min_similarity=30.0)
+        return results if results else None
 
     except Exception as exc:
-        print(f"[RECOMMENDER] CORE error: {exc}")
+        print(f"[RECOMMENDER] OpenAlex error: {exc}")
         return None
 
 
 def _rank_candidates(candidates: list, query_terms: list, min_similarity: float = 30.0) -> list:
-    # Embed query + abstracts, compute cosine similarity, optionally filter, sort descending, return top 10.
-
-    # Pass min_similarity=0.0 to skip filtering (used for CORE fallback so that
-    # any real paper is returned rather than falling through to mock data).
+    # Embed query + candidate abstracts, compute cosine similarity,
+    # filter by min_similarity, sort descending, return top 10.
     model = _get_embedding_model()
     query_str = " ".join(query_terms)
 
+    # Encode the query and all abstracts in one batch for efficiency
     uploaded_emb = model.encode(query_str, convert_to_tensor=True)
     abstract_texts = [c["abstract"] for c in candidates]
     candidate_embs = model.encode(abstract_texts, convert_to_tensor=True)
+
+    # Cosine similarity: shape (1, N) -> take first row
     scores = util.cos_sim(uploaded_emb, candidate_embs)[0]
 
+    # Attach similarity score to each candidate (stored as integer percentage, e.g. 87)
     for i, c in enumerate(candidates):
         c["similarity"] = round(float(scores[i]) * 100)
 
+    # Filter out candidates below the similarity threshold
     if min_similarity > 0:
         candidates = [c for c in candidates if c["similarity"] >= min_similarity]
 
+    # Sort by similarity descending and return top 10
     candidates.sort(key=lambda x: x["similarity"], reverse=True)
     return candidates[:10]
 
+
 def get_recommendations(title: str, keywords: list) -> list:
-    
+    # Public entry point called by papers.py /recommend endpoint.
+    # Returns up to 10 semantically similar papers ranked by cosine similarity.
+
     # Check cache first to avoid redundant API calls for the same paper in one session
     cache_key = _make_cache_key(title, keywords)
     if cache_key in _cache:
         print("[RECOMMENDER] Cache HIT")
         return _cache[cache_key]
 
-    # Query is title + top 3 keywords for best search relevance
+    # Query = title + top 3 keywords for best search relevance
     query_terms = [title] + keywords[:3]
 
-    # Lazy-load embedding model once
+    # Ensure embedding model is loaded before making API calls
     _get_embedding_model()
 
-    # 1. Try Semantic Scholar (with retry on 429)
-    results = _try_semantic_scholar(query_terms)
+    # Try OpenAlex (free, no API key, 250M+ works)
+    results = _try_openalex(query_terms)
 
-    # 2. Fall back to CORE
+    # If OpenAlex returns nothing (network error or no matches above threshold)
     if not results:
-        results = _try_core(query_terms)
-
-    # 3. Last-resort mock
-    if not results:
-        print("[RECOMMENDER] WARNING: All providers failed — returning empty list")
+        print("[RECOMMENDER] WARNING: OpenAlex returned no results — returning empty list")
         results = []
 
     _cache[cache_key] = results
