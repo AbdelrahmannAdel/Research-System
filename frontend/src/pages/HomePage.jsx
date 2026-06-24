@@ -210,7 +210,7 @@ function HomePage({ userName, darkMode, setDarkMode, onLogout, token }) {
                       Click to select a PDF
                     </div>
                     <div className="iv-mono text-[11.5px] mt-1" style={{ color: 'var(--text-mute)', letterSpacing: '0.04em' }}>
-                      or drag and drop · max 25 MB
+                      or drag and drop · max 25 MB, larger files take longer to process
                     </div>
                   </>
                 )}
