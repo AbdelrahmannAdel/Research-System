@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str    # secret key used to sign and verify JWT tokens
     GEMINI_API_KEY: str
     HF_TOKEN: str
+    GROQ_API_KEY: str
 
     class Config:
         # Tell BaseSettings to look for variables in the .env file

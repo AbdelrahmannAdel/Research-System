@@ -49,7 +49,7 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     elif extracted["intro"]:
         abstract = extracted["intro"]
     else:
-        # no abstract or intro found — use first 300 words of full text
+        # no abstract or intro found, use first 300 words of full text
         # (avoids pulling in figure captions, DNA sequences, references)
         words = extracted["full_text"].split()
         abstract = " ".join(words[:300])
@@ -84,11 +84,19 @@ async def upload_paper(file: UploadFile = File(...), current_user: User = Depend
     print(f"[TIMING] Classification: {time.time() - t1:.2f}s")
 
     t2 = time.time()
-    summary = summarize(extracted["summary_input"])
+    try:
+        summary = summarize(extracted["summary_input"])
+    except Exception as e:
+        print(f"[PIPELINE] Summarization failed, using fallback: {e}")
+        summary = "Summary unavailable, the summarization service is temporarily down. Please try again later."
     print(f"[TIMING] Summarization: {time.time() - t2:.2f}s")
 
     t3 = time.time()
-    keywords = extract_keywords(cleaned_full_text)
+    try:
+        keywords = extract_keywords(cleaned_full_text)
+    except Exception as e:
+        print(f"[PIPELINE] Keyword extraction failed, using fallback: {e}")
+        keywords = []
     print(f"[TIMING] Keywords: {time.time() - t3:.2f}s")
 
     print(f"[TIMING] Total: {time.time() - t0:.2f}s")
